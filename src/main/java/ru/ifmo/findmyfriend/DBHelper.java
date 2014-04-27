@@ -2,8 +2,13 @@ package ru.ifmo.findmyfriend;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Created by: avgarder
@@ -39,6 +44,25 @@ public class DBHelper extends SQLiteOpenHelper {
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         db.execSQL("DROP TABLE friends;");
         onCreate(db);
+    }
+
+    public static List<FriendData> getAllFriends(Context context) {
+        SQLiteDatabase db = new DBHelper(context).getReadableDatabase();
+        Cursor c = db.query(DBHelper.FRIENDS, null, null, null, null, null, null);
+        if (c == null || !c.moveToFirst()) {
+            return Collections.emptyList();
+        }
+
+        int id = c.getColumnIndex(DBHelper.ID);
+        int name = c.getColumnIndex(DBHelper.NAME);
+        int latitude = c.getColumnIndex(DBHelper.LATITUDE);
+        int longitude = c.getColumnIndex(DBHelper.LONGITUDE);
+        List<FriendData> res = new ArrayList<FriendData>();
+        do {
+            FriendData data = new FriendData(c.getLong(id), c.getString(name), c.getDouble(latitude), c.getDouble(longitude));
+            res.add(data);
+        } while (c.moveToNext());
+        return res;
     }
 
     private void insertTempData(SQLiteDatabase db) {
