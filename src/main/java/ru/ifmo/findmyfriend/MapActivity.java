@@ -16,6 +16,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
+
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
@@ -135,17 +136,21 @@ public class MapActivity extends Activity {
         // update the main content by replacing fragments
 
         FragmentManager fragmentManager = getFragmentManager();
-        if (position == 0) {
-            Fragment mapFragment = new BasicMapActivity();
-            mapFragment.getFragmentManager();
-            fragmentManager.beginTransaction().replace(R.id.content_frame, mapFragment).commit();
-
-        } else {
-            Fragment tempFragment = new TempFragment();
-            Bundle args = new Bundle();
-            args.putInt(TempFragment.ARG_FRAGMENT_NUMBER, position);
-            tempFragment.setArguments(args);
-            fragmentManager.beginTransaction().replace(R.id.content_frame, tempFragment).commit();
+        switch (position) {
+            case 0:
+                Fragment mapFragment = new BasicMapActivity();
+                fragmentManager.beginTransaction().replace(R.id.content_frame, mapFragment).commit();
+                break;
+            case 1:
+                Fragment friendListFragment = new FriendListFragment();
+                fragmentManager.beginTransaction().replace(R.id.content_frame, friendListFragment).commit();
+                break;
+            default:
+                Fragment tempFragment = new TempFragment();
+                Bundle args = new Bundle();
+                args.putInt(TempFragment.ARG_FRAGMENT_NUMBER, position);
+                tempFragment.setArguments(args);
+                fragmentManager.beginTransaction().replace(R.id.content_frame, tempFragment).commit();
         }
 
         drawerList.setItemChecked(position, true);

@@ -21,15 +21,16 @@ public class MainActivity extends Activity implements OkTokenRequestListener {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
         startActivity(new Intent(this, MapActivity.class));
+        finish();
 //        mOdnoklassniki = Odnoklassniki.createInstance(getApplicationContext(), APP_ID, APP_SECRET_KEY, APP_PUBLIC_KEY);
 //        mOdnoklassniki.setTokenRequestListener(this);
     }
 
-    @Override
-    public void onDestroy() {
-        mOdnoklassniki.removeTokenRequestListener();
-        super.onDestroy();
-    }
+//    @Override
+//    public void onDestroy() {
+//        mOdnoklassniki.removeTokenRequestListener();
+//        super.onDestroy();
+//    }
 
     @Override
     public void onSuccess(String token) {
