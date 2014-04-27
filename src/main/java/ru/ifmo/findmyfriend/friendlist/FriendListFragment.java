@@ -1,9 +1,11 @@
-package ru.ifmo.findmyfriend;
+package ru.ifmo.findmyfriend.friendlist;
 
 import android.os.Bundle;
 import android.app.ListFragment;
 import android.view.View;
 import android.widget.ListView;
+
+import ru.ifmo.findmyfriend.utils.DBHelper;
 
 public class FriendListFragment extends ListFragment {
 
