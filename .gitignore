@@ -2,3 +2,8 @@
 out
 *.iml
 *.un~
+.DS_Store
+build
+.gradle
+local.properties
+
