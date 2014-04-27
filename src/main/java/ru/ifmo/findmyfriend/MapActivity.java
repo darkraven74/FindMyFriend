@@ -31,8 +31,6 @@ public class MapActivity extends Activity {
     LocationManager locManager;
     Location location;
     LatLng curLocation;
-    GoogleMap map;
-    Marker me;
 
     private DrawerLayout drawerLayout;
     private ListView drawerList;
@@ -51,19 +49,14 @@ public class MapActivity extends Activity {
         drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawerList = (ListView) findViewById(R.id.left_drawer);
 
-        // set a custom shadow that overlays the main content when the drawer opens
         drawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
-        // set up the drawer's list view with items and click listener
         drawerList.setAdapter(new ArrayAdapter<String>(this,
                 R.layout.drawer_list_item, menuTitles));
         drawerList.setOnItemClickListener(new DrawerItemClickListener());
 
-        // enable ActionBar app icon to behave as action to toggle nav drawer
         getActionBar().setDisplayHomeAsUpEnabled(true);
         getActionBar().setHomeButtonEnabled(true);
 
-        // ActionBarDrawerToggle ties together the the proper interactions
-        // between the sliding drawer and the action bar app icon
         drawerToggle = new ActionBarDrawerToggle(
                 this,                  /* host Activity */
                 drawerLayout,         /* DrawerLayout object */
@@ -72,7 +65,6 @@ public class MapActivity extends Activity {
                 R.string.drawer_close  /* "close drawer" description for accessibility */
         ) {
 
-
         };
         drawerLayout.setDrawerListener(drawerToggle);
 
@@ -80,20 +72,9 @@ public class MapActivity extends Activity {
             selectItem(0);
         }
 
-
         locManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         location = getLastBestLocation();
         curLocation = new LatLng(location.getLatitude(), location.getLongitude());
-
-        /*map = ((MapFragment) getFragmentManager().findFragmentById(R.id.map)).getMap();
-
-
-        me = map.addMarker(new MarkerOptions()
-                .position(curLocation)
-                .title("title").snippet("text")
-                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
-
-        map.moveCamera(CameraUpdateFactory.newLatLngZoom(curLocation, 12));      */
 
     }
 
@@ -126,42 +107,19 @@ public class MapActivity extends Activity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-//        MenuInflater inflater = getMenuInflater();
-        // inflater.inflate(R.menu.main, menu);    !!!!!!!!!!!1
         return super.onCreateOptionsMenu(menu);
     }
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-        // If the nav drawer is open, hide action items related to the content view
-//        boolean drawerOpen = drawerLayout.isDrawerOpen(drawerList);
-        //menu.findItem(R.id.action_websearch).setVisible(!drawerOpen); !!!!!!!!!!!!!!!!!
         return super.onPrepareOptionsMenu(menu);
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // The action bar home/up action should open or close the drawer.
-        // ActionBarDrawerToggle will take care of this.
         if (drawerToggle.onOptionsItemSelected(item)) {
             return true;
         }
-        // Handle action buttons
-        /*switch(item.getItemId()) {
-            case R.id.action_websearch:
-                // create intent to perform web search for this planet
-                Intent intent = new Intent(Intent.ACTION_WEB_SEARCH);
-                intent.putExtra(SearchManager.QUERY, getActionBar().getTitle());
-                // catch event that there's no activity to handle intent
-                if (intent.resolveActivity(getPackageManager()) != null) {
-                    startActivity(intent);
-                } else {
-                    Toast.makeText(this, R.string.app_not_available, Toast.LENGTH_LONG).show();
-                }
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
-        }                                         */
         return super.onOptionsItemSelected(item);
     }
 
@@ -176,34 +134,26 @@ public class MapActivity extends Activity {
     private void selectItem(int position) {
         // update the main content by replacing fragments
 
-
-        Fragment fragment = new PlanetFragment();
-        Fragment mapfragment = new BasicMapActivity();
-
-
-        Bundle args = new Bundle();
-        args.putInt(PlanetFragment.ARG_PLANET_NUMBER, position);
-        fragment.setArguments(args);
-
-        mapfragment.getFragmentManager();
         FragmentManager fragmentManager = getFragmentManager();
         if (position == 0) {
-            fragmentManager.beginTransaction().replace(R.id.content_frame, mapfragment).commit();
+            Fragment mapFragment = new BasicMapActivity();
+            mapFragment.getFragmentManager();
+            fragmentManager.beginTransaction().replace(R.id.content_frame, mapFragment).commit();
 
         } else {
-            fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
-
+            Fragment tempFragment = new TempFragment();
+            Bundle args = new Bundle();
+            args.putInt(TempFragment.ARG_FRAGMENT_NUMBER, position);
+            tempFragment.setArguments(args);
+            fragmentManager.beginTransaction().replace(R.id.content_frame, tempFragment).commit();
         }
-        // update selected item and title, then close the drawer
 
         drawerList.setItemChecked(position, true);
         drawerList.setItemChecked(position, false);
 
-
         setTitle(menuTitles[position]);
         drawerLayout.closeDrawer(drawerList);
     }
-
 
     public class BasicMapActivity extends Fragment {
         /**
@@ -216,12 +166,9 @@ public class MapActivity extends Activity {
 
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
-            View inflatedView = inflater.inflate(R.layout.map_test, container, false);
-
+            View inflatedView = inflater.inflate(R.layout.map_fragment, container, false);
             MapsInitializer.initialize(getActivity());
-
-
-            mMapView = (MapView) inflatedView.findViewById(R.id.map3);
+            mMapView = (MapView) inflatedView.findViewById(R.id.mapView);
             mMapView.onCreate(mBundle);
             setUpMapIfNeeded(inflatedView);
 
@@ -237,7 +184,7 @@ public class MapActivity extends Activity {
 
         private void setUpMapIfNeeded(View inflatedView) {
             if (mMap == null) {
-                mMap = ((MapView) inflatedView.findViewById(R.id.map3)).getMap();
+                mMap = ((MapView) inflatedView.findViewById(R.id.mapView)).getMap();
                 if (mMap != null) {
                     setUpMap();
                 }
@@ -245,7 +192,7 @@ public class MapActivity extends Activity {
         }
 
         private void setUpMap() {
-            me = mMap.addMarker(new MarkerOptions()
+            Marker me = mMap.addMarker(new MarkerOptions()
                     .position(curLocation)
                     .title("title").snippet("text")
                     .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
@@ -300,10 +247,10 @@ public class MapActivity extends Activity {
     /**
      * Fragment that appears in the "content_frame", shows a planet
      */
-    public static class PlanetFragment extends Fragment {
-        public static final String ARG_PLANET_NUMBER = "planet_number";
+    public static class TempFragment extends Fragment {
+        public static final String ARG_FRAGMENT_NUMBER = "fragment_number";
 
-        public PlanetFragment() {
+        public TempFragment() {
             // Empty constructor required for fragment subclasses
         }
 
@@ -311,15 +258,13 @@ public class MapActivity extends Activity {
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
 
-
-            int i = getArguments().getInt(ARG_PLANET_NUMBER);
+            int i = getArguments().getInt(ARG_FRAGMENT_NUMBER);
             View rootView = inflater.inflate(R.layout.test_fragment, container, false);
-            String planet = getResources().getStringArray(R.array.drawer_array)[i];
-            ((TextView) rootView.findViewById(R.id.text)).setText(planet);
-            getActivity().setTitle(planet);
+            String text = getResources().getStringArray(R.array.drawer_array)[i];
+            ((TextView) rootView.findViewById(R.id.text)).setText(text);
+            getActivity().setTitle(text);
             return rootView;
         }
-
     }
 
 

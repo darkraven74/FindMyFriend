@@ -5,7 +5,7 @@
              android:layout_height="match_parent">
 
     <com.google.android.gms.maps.MapView xmlns:android="http://schemas.android.com/apk/res/android"
-                                         android:id="@+id/map3"
+                                         android:id="@+id/mapView"
                                          android:background="@android:color/white"
                                          android:layout_width="match_parent"
                                          android:layout_height="match_parent"/>
