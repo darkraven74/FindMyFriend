@@ -1,4 +1,4 @@
-package ru.ifmo.findmyfriend;
+package ru.ifmo.findmyfriend.friendlist;
 
 /**
  * Created by: avgarder

@@ -1,4 +1,4 @@
-package ru.ifmo.findmyfriend;
+package ru.ifmo.findmyfriend.friendlist;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -10,6 +10,8 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import ru.ifmo.findmyfriend.R;
 
 /**
  * Created by: avgarder
