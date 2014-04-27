@@ -3,6 +3,7 @@ package ru.ifmo.findmyfriend.map;
 import android.app.Fragment;
 import android.location.Location;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -32,6 +33,8 @@ public class MapFragment extends Fragment {
 
     private LatLng mCurLocation;
 
+    private Handler mHandler = new Handler();
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -43,11 +46,17 @@ public class MapFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View inflatedView = inflater.inflate(R.layout.map_fragment, container, false);
+        final View inflatedView = inflater.inflate(R.layout.map_fragment, container, false);
         MapsInitializer.initialize(getActivity());
         mMapView = (MapView) inflatedView.findViewById(R.id.mapView);
         mMapView.onCreate(mBundle);
-        setUpMapIfNeeded(inflatedView);
+
+        mHandler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                setUpMapIfNeeded(inflatedView);
+            }
+        }, 200);
 
         return inflatedView;
     }
