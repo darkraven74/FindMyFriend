@@ -24,6 +24,8 @@ import ru.ifmo.findmyfriend.utils.LocationUtils;
  * Created by: avgarder
  */
 public class MapFragment extends Fragment {
+    public static final String BUNDLE_KEY_ID = "bundle_key_id";
+
     /**
      * Note that this may be null if the Google Play services APK is not available.
      */
@@ -41,6 +43,12 @@ public class MapFragment extends Fragment {
         mBundle = savedInstanceState;
         Location location = LocationUtils.getLastBestLocation(getActivity());
         mCurLocation = new LatLng(location.getLatitude(), location.getLongitude());
+
+        Bundle args = getArguments();
+        if (args != null && args.containsKey(BUNDLE_KEY_ID)) {
+            long selectedUserId = args.getLong(BUNDLE_KEY_ID);
+            //TODO: deal with it :)
+        }
     }
 
     @Override

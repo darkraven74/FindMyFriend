@@ -95,19 +95,17 @@ public class MainActivity extends Activity {
         FragmentManager fragmentManager = getFragmentManager();
         switch (position) {
             case 0:
-                Fragment mapFragment = new MapFragment();
-                fragmentManager.beginTransaction().replace(R.id.content_frame, mapFragment).commit();
+                switchToFragment(new MapFragment());
                 break;
             case 1:
-                Fragment friendListFragment = new FriendListFragment();
-                fragmentManager.beginTransaction().replace(R.id.content_frame, friendListFragment).commit();
+                switchToFragment(new FriendListFragment());
                 break;
             default:
                 Fragment tempFragment = new TempFragment();
                 Bundle args = new Bundle();
                 args.putInt(TempFragment.ARG_FRAGMENT_NUMBER, position);
                 tempFragment.setArguments(args);
-                fragmentManager.beginTransaction().replace(R.id.content_frame, tempFragment).commit();
+                switchToFragment(tempFragment);
         }
 
         drawerList.setItemChecked(position, true);
@@ -117,7 +115,10 @@ public class MainActivity extends Activity {
         drawerLayout.closeDrawer(drawerList);
     }
 
-
+    public void switchToFragment(Fragment fragment) {
+        FragmentManager fragmentManager = getFragmentManager();
+        fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
+    }
 
     @Override
     public void setTitle(CharSequence title) {
