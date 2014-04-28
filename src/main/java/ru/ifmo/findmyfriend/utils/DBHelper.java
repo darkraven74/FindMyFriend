@@ -63,6 +63,7 @@ public class DBHelper extends SQLiteOpenHelper {
             FriendData data = new FriendData(c.getLong(id), c.getString(name), c.getDouble(latitude), c.getDouble(longitude));
             res.add(data);
         } while (c.moveToNext());
+        db.close();
         return res;
     }
 
