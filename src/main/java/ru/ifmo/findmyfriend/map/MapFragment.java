@@ -17,14 +17,19 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.util.List;
+
 import ru.ifmo.findmyfriend.R;
+import ru.ifmo.findmyfriend.friendlist.FriendData;
+import ru.ifmo.findmyfriend.utils.DBHelper;
 import ru.ifmo.findmyfriend.utils.LocationUtils;
 
 /**
  * Created by: avgarder
  */
 public class MapFragment extends Fragment {
-    public static final String BUNDLE_KEY_ID = "bundle_key_id";
+    public static final String BUNDLE_KEY_LONGITUDE = "bundle_key_longitude";
+    public static final String BUNDLE_KEY_LATITUDE = "bundle_key_latitude";
 
     /**
      * Note that this may be null if the Google Play services APK is not available.
@@ -45,9 +50,10 @@ public class MapFragment extends Fragment {
         mCurLocation = new LatLng(location.getLatitude(), location.getLongitude());
 
         Bundle args = getArguments();
-        if (args != null && args.containsKey(BUNDLE_KEY_ID)) {
-            long selectedUserId = args.getLong(BUNDLE_KEY_ID);
-            //TODO: deal with it :)
+        if (args != null && args.containsKey(BUNDLE_KEY_LONGITUDE)
+                && args.containsKey(BUNDLE_KEY_LATITUDE)) {
+            mCurLocation = new LatLng(args.getDouble(BUNDLE_KEY_LATITUDE),
+                    args.getDouble(BUNDLE_KEY_LONGITUDE));
         }
     }
 
@@ -79,11 +85,21 @@ public class MapFragment extends Fragment {
     }
 
     private void setUpMap() {
-        Marker me = mMap.addMarker(new MarkerOptions()
+        mMap.setMyLocationEnabled(true);
+
+        List<FriendData> allFriends = DBHelper.getAllFriends(getActivity());
+        for (FriendData friendData : allFriends) {
+            mMap.addMarker(new MarkerOptions()
+                    .position(new LatLng(friendData.getLatitude(), friendData.getLongitude()))
+                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
+        }
+
+
+        /*Marker me = mMap.addMarker(new MarkerOptions()
                 .position(mCurLocation)
                 .title("title").snippet("text")
                 .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
-
+*/
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mCurLocation, 12));
     }
 
