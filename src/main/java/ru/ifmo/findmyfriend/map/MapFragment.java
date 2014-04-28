@@ -1,6 +1,10 @@
 package ru.ifmo.findmyfriend.map;
 
 import android.app.Fragment;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Paint;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
@@ -14,7 +18,6 @@ import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.util.List;
@@ -75,6 +78,18 @@ public class MapFragment extends Fragment {
         return inflatedView;
     }
 
+    private Bitmap getMarkerBitmap(int resourceId) {
+        Bitmap.Config conf = Bitmap.Config.ARGB_8888;
+        Bitmap bmp = Bitmap.createBitmap(90, 125, conf);
+        Canvas canvas = new Canvas(bmp);
+        Paint color = new Paint();
+        canvas.drawBitmap(BitmapFactory.decodeResource(getResources(),
+                R.drawable.custom_marker), 0, 0, color);
+        canvas.drawBitmap(BitmapFactory.decodeResource(getResources(),
+                resourceId), 10, 10, color);
+        return bmp;
+    }
+
     private void setUpMapIfNeeded(View inflatedView) {
         if (mMap == null) {
             mMap = ((MapView) inflatedView.findViewById(R.id.mapView)).getMap();
@@ -84,22 +99,22 @@ public class MapFragment extends Fragment {
         }
     }
 
+
     private void setUpMap() {
         mMap.setMyLocationEnabled(true);
 
         List<FriendData> allFriends = DBHelper.getAllFriends(getActivity());
+
         for (FriendData friendData : allFriends) {
+            int resourceId = getActivity().getResources().getIdentifier("marker" + friendData.getId(),
+                    "drawable", "ru.ifmo.findmyfriend");
             mMap.addMarker(new MarkerOptions()
                     .position(new LatLng(friendData.getLatitude(), friendData.getLongitude()))
-                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
+                    .icon(BitmapDescriptorFactory.fromBitmap(getMarkerBitmap(resourceId))))
+                    .setAnchor(0.5f, 1);
         }
 
 
-        /*Marker me = mMap.addMarker(new MarkerOptions()
-                .position(mCurLocation)
-                .title("title").snippet("text")
-                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
-*/
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mCurLocation, 12));
     }
 
