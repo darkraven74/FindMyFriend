@@ -24,7 +24,9 @@ public class FriendListFragment extends ListFragment {
         super.onListItemClick(l, v, position, id);
         MapFragment mapFragment = new MapFragment();
         Bundle args = new Bundle();
-        args.putLong(MapFragment.BUNDLE_KEY_ID, id);
+        FriendData item = (FriendData) l.getItemAtPosition(position);
+        args.putDouble(MapFragment.BUNDLE_KEY_LATITUDE, item.getLatitude());
+        args.putDouble(MapFragment.BUNDLE_KEY_LONGITUDE, item.getLongitude());
         mapFragment.setArguments(args);
         MainActivity mainActivity = (MainActivity) getActivity();
         mainActivity.switchToFragment(mapFragment);
