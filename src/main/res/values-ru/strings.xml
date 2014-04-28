@@ -3,11 +3,9 @@
     <string name="app_name">Найди друга</string>
     <string name="drawer_open">Open navigation drawer</string>
     <string name="drawer_close">Close navigation drawer</string>
-    <string-array name="drawer_array">
-        <item>Карта</item>
-        <item>Друзья</item>
-        <item>Настройки</item>
-        <item>О программе</item>
-        <item>Выход</item>
-    </string-array>
+    <string name="menu_map">Карта</string>
+    <string name="menu_friends">Друзья</string>
+    <string name="menu_settings">Настройки</string>
+    <string name="menu_about">О программе</string>
+    <string name="menu_exit">Выход</string>
 </resources>
