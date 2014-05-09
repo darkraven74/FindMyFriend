@@ -39,13 +39,10 @@ public class MapFragment extends Fragment {
     public static final String BUNDLE_KEY_LONGITUDE = "bundle_key_longitude";
     public static final String BUNDLE_KEY_LATITUDE = "bundle_key_latitude";
 
-    /**
-     * Note that this may be null if the Google Play services APK is not available.
-     */
     private MapView mMapView;
     private GoogleMap mMap;
     private Bundle mBundle;
-    private Map<String, String> idFromName;
+    private Map<String, Long> idFromName;
 
     private LatLng mCurLocation;
 
@@ -108,13 +105,13 @@ public class MapFragment extends Fragment {
 
     private void setUpMap() {
         mMap.setMyLocationEnabled(true);
-        idFromName = new HashMap<String, String>();
+        idFromName = new HashMap<String, Long>();
         List<FriendData> allFriends = DBHelper.getAllFriends(getActivity());
 
         for (FriendData friendData : allFriends) {
             int resourceId = getActivity().getResources().getIdentifier("marker" + friendData.getId(),
                     "drawable", "ru.ifmo.findmyfriend");
-            idFromName.put(friendData.getName(), String.valueOf(friendData.getId()));
+            idFromName.put(friendData.getName(), friendData.getId());
             mMap.addMarker(new MarkerOptions()
                     .position(new LatLng(friendData.getLatitude(), friendData.getLongitude()))
                     .icon(BitmapDescriptorFactory.fromBitmap(getMarkerBitmap(resourceId)))
@@ -151,6 +148,4 @@ public class MapFragment extends Fragment {
         mMapView.onDestroy();
         super.onDestroy();
     }
-
-
 }
