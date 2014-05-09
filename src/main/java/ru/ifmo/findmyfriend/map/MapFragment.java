@@ -103,13 +103,13 @@ public class MapFragment extends Fragment {
     private void setUpMap() {
         mMap.setMyLocationEnabled(true);
 
-        List<FriendData> allFriends = DBHelper.getAllFriends(getActivity());
+        List<FriendData> allFriends = DBHelper.getOnlineFriends(getActivity());
 
         for (FriendData friendData : allFriends) {
-            int resourceId = getActivity().getResources().getIdentifier("marker" + friendData.getId(),
+            int resourceId = getActivity().getResources().getIdentifier("marker" + friendData.id,
                     "drawable", "ru.ifmo.findmyfriend");
             mMap.addMarker(new MarkerOptions()
-                    .position(new LatLng(friendData.getLatitude(), friendData.getLongitude()))
+                    .position(new LatLng(friendData.latitude, friendData.longitude))
                     .icon(BitmapDescriptorFactory.fromBitmap(getMarkerBitmap(resourceId))))
                     .setAnchor(0.5f, 1);
         }
