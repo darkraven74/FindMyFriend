@@ -1,11 +1,13 @@
 package ru.ifmo.findmyfriend.map;
 
 import android.app.Fragment;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.location.Location;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.LayoutInflater;
@@ -18,9 +20,12 @@ import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import ru.ifmo.findmyfriend.R;
 import ru.ifmo.findmyfriend.friendlist.FriendData;
@@ -34,12 +39,10 @@ public class MapFragment extends Fragment {
     public static final String BUNDLE_KEY_LONGITUDE = "bundle_key_longitude";
     public static final String BUNDLE_KEY_LATITUDE = "bundle_key_latitude";
 
-    /**
-     * Note that this may be null if the Google Play services APK is not available.
-     */
     private MapView mMapView;
     private GoogleMap mMap;
     private Bundle mBundle;
+    private Map<String, Long> idFromName;
 
     private LatLng mCurLocation;
 
@@ -99,23 +102,30 @@ public class MapFragment extends Fragment {
         }
     }
 
-
     private void setUpMap() {
         mMap.setMyLocationEnabled(true);
-
-        List<FriendData> allFriends = DBHelper.getOnlineFriends(getActivity());
-
+        idFromName = new HashMap<String, Long>();
+        List<FriendData> allFriends = DBHelper.getAllFriends(getActivity());
         for (FriendData friendData : allFriends) {
             int resourceId = getActivity().getResources().getIdentifier("marker" + friendData.id,
                     "drawable", "ru.ifmo.findmyfriend");
+            idFromName.put(friendData.name, friendData.id);
             mMap.addMarker(new MarkerOptions()
                     .position(new LatLng(friendData.latitude, friendData.longitude))
-                    .icon(BitmapDescriptorFactory.fromBitmap(getMarkerBitmap(resourceId))))
+                    .icon(BitmapDescriptorFactory.fromBitmap(getMarkerBitmap(resourceId)))
+                    .title(friendData.name))
                     .setAnchor(0.5f, 1);
         }
 
-
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mCurLocation, 12));
+        mMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
+            @Override
+            public void onInfoWindowClick(Marker marker) {
+                Intent browseIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://www.odnoklassniki.ru/profile/"
+                        + idFromName.get(marker.getTitle())));
+                startActivity(browseIntent);
+            }
+        });
     }
 
     @Override
