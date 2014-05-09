@@ -105,7 +105,7 @@ public class MapFragment extends Fragment {
     private void setUpMap() {
         mMap.setMyLocationEnabled(true);
         idFromName = new HashMap<String, Long>();
-        List<FriendData> allFriends = DBHelper.getAllFriends(getActivity());
+        List<FriendData> allFriends = DBHelper.getOnlineFriends(getActivity());
         for (FriendData friendData : allFriends) {
             int resourceId = getActivity().getResources().getIdentifier("marker" + friendData.id,
                     "drawable", "ru.ifmo.findmyfriend");
