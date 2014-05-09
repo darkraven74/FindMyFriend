@@ -102,23 +102,20 @@ public class MapFragment extends Fragment {
         }
     }
 
-
     private void setUpMap() {
         mMap.setMyLocationEnabled(true);
         idFromName = new HashMap<String, Long>();
-        List<FriendData> allFriends = DBHelper.getAllFriends(getActivity());
-
+        List<FriendData> allFriends = DBHelper.getOnlineFriends(getActivity());
         for (FriendData friendData : allFriends) {
-            int resourceId = getActivity().getResources().getIdentifier("marker" + friendData.getId(),
+            int resourceId = getActivity().getResources().getIdentifier("marker" + friendData.id,
                     "drawable", "ru.ifmo.findmyfriend");
-            idFromName.put(friendData.getName(), friendData.getId());
+            idFromName.put(friendData.name, friendData.id);
             mMap.addMarker(new MarkerOptions()
-                    .position(new LatLng(friendData.getLatitude(), friendData.getLongitude()))
+                    .position(new LatLng(friendData.latitude, friendData.longitude))
                     .icon(BitmapDescriptorFactory.fromBitmap(getMarkerBitmap(resourceId)))
-                    .title(friendData.getName()))
+                    .title(friendData.name))
                     .setAnchor(0.5f, 1);
         }
-
 
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mCurLocation, 12));
         mMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {

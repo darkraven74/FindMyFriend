@@ -38,7 +38,7 @@ public class FriendListAdapter extends BaseAdapter {
 
     @Override
     public long getItemId(int position) {
-        return getItem(position).getId();
+        return getItem(position).id;
     }
 
     @Override
@@ -52,7 +52,7 @@ public class FriendListAdapter extends BaseAdapter {
         TextView name = (TextView) view.findViewById(R.id.name);
 
         avatar.setImageResource(parent.getContext().getResources().getIdentifier("ava" + (position + 1), "drawable", "ru.ifmo.findmyfriend"));
-        name.setText(getItem(position).getName());
+        name.setText(getItem(position).name);
         return view;
     }
 }

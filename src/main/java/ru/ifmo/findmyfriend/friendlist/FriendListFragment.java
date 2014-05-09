@@ -1,7 +1,7 @@
 package ru.ifmo.findmyfriend.friendlist;
 
-import android.os.Bundle;
 import android.app.ListFragment;
+import android.os.Bundle;
 import android.view.View;
 import android.widget.ListView;
 
@@ -25,8 +25,8 @@ public class FriendListFragment extends ListFragment {
         MapFragment mapFragment = new MapFragment();
         Bundle args = new Bundle();
         FriendData item = (FriendData) l.getItemAtPosition(position);
-        args.putDouble(MapFragment.BUNDLE_KEY_LATITUDE, item.getLatitude());
-        args.putDouble(MapFragment.BUNDLE_KEY_LONGITUDE, item.getLongitude());
+        args.putDouble(MapFragment.BUNDLE_KEY_LATITUDE, item.latitude);
+        args.putDouble(MapFragment.BUNDLE_KEY_LONGITUDE, item.longitude);
         mapFragment.setArguments(args);
         MainActivity mainActivity = (MainActivity) getActivity();
         mainActivity.switchToFragment(mapFragment);

@@ -8,6 +8,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import ru.ifmo.findmyfriend.friendlist.FriendData;
 
@@ -20,9 +21,13 @@ public class DBHelper extends SQLiteOpenHelper {
     public static final String NAME = "name";
     public static final String LATITUDE = "latitude";
     public static final String LONGITUDE = "longitude";
+    public static final String IMAGE_URL = "image_url";
+    public static final String IS_ALIVE = "is_alive";
     public static final String UPDATE_TIME = "update_time";
 
-    private static final int VERSION = 1;
+    public static final long ALIVE_INTERVAL = TimeUnit.MINUTES.toMillis(15);
+
+    private static final int VERSION = 2;
 
     public DBHelper(Context context) {
         super(context, "mainDB", null, VERSION);
@@ -35,7 +40,9 @@ public class DBHelper extends SQLiteOpenHelper {
                 NAME + " TEXT," +
                 LATITUDE + " REAL," +
                 LONGITUDE + " REAL," +
-                UPDATE_TIME + "INTEGER" +
+                IMAGE_URL + " TEXT," +
+                IS_ALIVE + " INTEGER," +
+                UPDATE_TIME + " LONG" +
                 ");");
 
         insertTempData(db);
@@ -50,6 +57,24 @@ public class DBHelper extends SQLiteOpenHelper {
     public static List<FriendData> getAllFriends(Context context) {
         SQLiteDatabase db = new DBHelper(context).getReadableDatabase();
         Cursor c = db.query(DBHelper.FRIENDS, null, null, null, null, null, null);
+        List<FriendData> res = getFriendsFromCursor(c);
+        db.close();
+        return res;
+    }
+
+    public static List<FriendData> getOnlineFriends(Context context) {
+        SQLiteDatabase db = new DBHelper(context).getReadableDatabase();
+        String updateTimeLimit = String.valueOf(System.currentTimeMillis() - ALIVE_INTERVAL);
+        updateTimeLimit = "0";
+
+        Cursor c = db.query(DBHelper.FRIENDS, null, IS_ALIVE + "=1 AND " + UPDATE_TIME + ">= $1",
+                new String[]{updateTimeLimit}, null, null, null);
+        List<FriendData> res = getFriendsFromCursor(c);
+        db.close();
+        return res;
+    }
+
+    private static List<FriendData> getFriendsFromCursor(Cursor c) {
         if (c == null || !c.moveToFirst()) {
             return Collections.emptyList();
         }
@@ -58,20 +83,23 @@ public class DBHelper extends SQLiteOpenHelper {
         int name = c.getColumnIndex(DBHelper.NAME);
         int latitude = c.getColumnIndex(DBHelper.LATITUDE);
         int longitude = c.getColumnIndex(DBHelper.LONGITUDE);
+        int imageUrl = c.getColumnIndex(DBHelper.IMAGE_URL);
+        int isAlive = c.getColumnIndex(DBHelper.IS_ALIVE);
+        int updateTime = c.getColumnIndex(DBHelper.UPDATE_TIME);
         List<FriendData> res = new ArrayList<FriendData>();
         do {
-            FriendData data = new FriendData(c.getLong(id), c.getString(name), c.getDouble(latitude), c.getDouble(longitude));
+            FriendData data = new FriendData(c.getLong(id), c.getString(name), c.getDouble(latitude),
+                    c.getDouble(longitude), c.getString(imageUrl), c.getInt(isAlive) == 1, c.getLong(updateTime));
             res.add(data);
         } while (c.moveToNext());
-        db.close();
         return res;
     }
 
     private void insertTempData(SQLiteDatabase db) {
-        db.execSQL("INSERT INTO friends VALUES (1, \"Марина Васильева\", 59.9570072, 30.2729272, 0);");
-        db.execSQL("INSERT INTO friends VALUES (2, \"Артем Комаров\", 59.9676194, 30.384112, 0);");
-        db.execSQL("INSERT INTO friends VALUES (3, \"Николай Иванов\", 59.9411471, 30.3793913, 0);");
-        db.execSQL("INSERT INTO friends VALUES (4, \"Эдгар Кузнецов\", 59.9235158, 30.3332144, 0);");
-        db.execSQL("INSERT INTO friends VALUES (5, \"Наталья Костенева\", 59.9232577, 30.2954489, 0);");
+        db.execSQL("INSERT INTO friends VALUES (1, \"Марина Васильева\", 59.9570072, 30.2729272, \"\", 1, 0);");
+        db.execSQL("INSERT INTO friends VALUES (2, \"Артем Комаров\", 59.9676194, 30.384112, \"\", 1, 0);");
+        db.execSQL("INSERT INTO friends VALUES (3, \"Николай Иванов\", 59.9411471, 30.3793913, \"\", 1, 0);");
+        db.execSQL("INSERT INTO friends VALUES (4, \"Эдгар Кузнецов\", 59.9235158, 30.3332144, \"\", 1, -1);");
+        db.execSQL("INSERT INTO friends VALUES (5, \"Наталья Костенева\", 59.9232577, 30.2954489, \"\", 0, 0);");
     }
 }
