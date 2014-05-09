@@ -24,7 +24,7 @@ public class OkFriends extends AsyncTask<Odnoklassniki, Void, List<FriendData>> 
             String friendsId = jsonArrayToString(odnoklassnikis[0].request("friends.get", null, "get"));
             Map<String, String> requestParams = new HashMap<String, String>();
             requestParams.put("uids", friendsId);
-            requestParams.put("fields", "uid, last_name, first_name, pic_5");
+            requestParams.put("fields", "uid, name, pic_5");
             String friendsInfo = odnoklassnikis[0].request("users.getInfo", requestParams, "get");
             result = getFriendsInfoFromResponse(friendsInfo);
         } catch (Exception e) {
@@ -47,8 +47,8 @@ public class OkFriends extends AsyncTask<Odnoklassniki, Void, List<FriendData>> 
         JSONArray friendsJSON = new JSONArray(response);
         for (int i = 0; i < friendsJSON.length(); i++) {
             JSONObject friend = friendsJSON.getJSONObject(i);
-            friends.add(new FriendData(Long.parseLong(friend.getString("uid")), friend.getString("first_name") + " " +
-                    friend.getString("last_name"), friend.getString("pic_5")));
+            friends.add(new FriendData(Long.parseLong(friend.getString("uid")), friend.getString("name"),
+                    friend.getString("pic_5")));
         }
         return friends;
     }
