@@ -27,7 +27,6 @@ public class DBHelper extends SQLiteOpenHelper {
 
     public static final long ALIVE_INTERVAL = TimeUnit.MINUTES.toMillis(15);
 
-
     private static final int VERSION = 2;
 
     public DBHelper(Context context) {
