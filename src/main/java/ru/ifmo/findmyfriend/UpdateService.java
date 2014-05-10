@@ -2,7 +2,6 @@ package ru.ifmo.findmyfriend;
 
 import android.app.IntentService;
 import android.content.Intent;
-import android.util.LongSparseArray;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -17,7 +16,9 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 import ru.ifmo.findmyfriend.friendlist.FriendData;
@@ -53,7 +54,7 @@ public class UpdateService extends IntentService {
         if (friends == null) {
             return;
         }
-        LongSparseArray<FriendData> friendById = new LongSparseArray<FriendData>();
+        Map<Long, FriendData> friendById = new HashMap<Long, FriendData>();
         for (FriendData friend : friends) {
             friendById.put(friend.id, friend);
         }
