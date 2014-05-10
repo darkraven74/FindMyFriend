@@ -16,7 +16,7 @@ import ru.ifmo.findmyfriend.friendlist.FriendData;
  * Created by: avgarder
  */
 public class DBHelper extends SQLiteOpenHelper {
-    public static final String FRIENDS = "friends";
+    public static final String TABLE_FRIENDS = "friends";
     public static final String ID = "id";
     public static final String NAME = "name";
     public static final String LATITUDE = "latitude";
@@ -35,7 +35,7 @@ public class DBHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        db.execSQL("CREATE TABLE friends (" +
+        db.execSQL("CREATE TABLE " + TABLE_FRIENDS + " (" +
                 ID + " INTEGER PRIMARY KEY," +
                 NAME + " TEXT," +
                 LATITUDE + " REAL," +
@@ -50,13 +50,27 @@ public class DBHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        db.execSQL("DROP TABLE friends;");
+        db.execSQL("DROP TABLE " + TABLE_FRIENDS + ";");
         onCreate(db);
+    }
+
+    public static void mapToDb(Context context, List<FriendData> friends) {
+        String queryFormat = "INSERT OR REPLACE INTO " + TABLE_FRIENDS + "(" +
+                ID + "," + NAME + "," + LATITUDE + "," + LONGITUDE + "," + IMAGE_URL + "," + IS_ALIVE + "," + UPDATE_TIME +
+                ") VALUES (%d, %s, %f, %f, %s, %d, %d);";
+        SQLiteDatabase db = new DBHelper(context).getWritableDatabase();
+        db.beginTransaction();
+        for (FriendData friend : friends) {
+            db.execSQL(String.format(queryFormat, friend.id, friend.name, friend.latitude, friend.longitude,
+                    friend.imageUrl, friend.isAlive ? 1 : 0, friend.updateTime));
+        }
+        db.endTransaction();
+        db.close();
     }
 
     public static List<FriendData> getAllFriends(Context context) {
         SQLiteDatabase db = new DBHelper(context).getReadableDatabase();
-        Cursor c = db.query(DBHelper.FRIENDS, null, null, null, null, null, null);
+        Cursor c = db.query(DBHelper.TABLE_FRIENDS, null, null, null, null, null, null);
         List<FriendData> res = getFriendsFromCursor(c);
         db.close();
         return res;
@@ -67,7 +81,7 @@ public class DBHelper extends SQLiteOpenHelper {
         String updateTimeLimit = String.valueOf(System.currentTimeMillis() - ALIVE_INTERVAL);
         updateTimeLimit = "0";
 
-        Cursor c = db.query(DBHelper.FRIENDS, null, IS_ALIVE + "=1 AND " + UPDATE_TIME + ">= $1",
+        Cursor c = db.query(DBHelper.TABLE_FRIENDS, null, IS_ALIVE + "=1 AND " + UPDATE_TIME + ">= $1",
                 new String[]{updateTimeLimit}, null, null, null);
         List<FriendData> res = getFriendsFromCursor(c);
         db.close();

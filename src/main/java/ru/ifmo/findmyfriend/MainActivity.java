@@ -3,6 +3,10 @@ package ru.ifmo.findmyfriend;
 import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.v4.app.ActionBarDrawerToggle;
@@ -28,6 +32,9 @@ public class MainActivity extends Activity {
 
     private CharSequence title;
     private String[] menuTitles;
+
+    private DataSetChangeable currentFragment;
+    private UpdateReceiver updateReceiver = new UpdateReceiver();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,6 +68,19 @@ public class MainActivity extends Activity {
         if (savedInstanceState == null) {
             selectItem(0);
         }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        IntentFilter filter = new IntentFilter(UpdateService.ACTION_DATA_UPDATED);
+        registerReceiver(updateReceiver, filter);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        unregisterReceiver(updateReceiver);
     }
 
     @Override
@@ -116,6 +136,7 @@ public class MainActivity extends Activity {
     }
 
     public void switchToFragment(Fragment fragment) {
+        currentFragment = (DataSetChangeable) fragment;
         FragmentManager fragmentManager = getFragmentManager();
         fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
     }
@@ -143,6 +164,13 @@ public class MainActivity extends Activity {
         super.onConfigurationChanged(newConfig);
         // Pass any configuration change to the drawer toggls
         drawerToggle.onConfigurationChanged(newConfig);
+    }
+
+    private class UpdateReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            currentFragment.notifyDataSetChanged();
+        }
     }
 
     /**
