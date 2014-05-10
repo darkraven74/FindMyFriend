@@ -42,7 +42,7 @@ public class MapFragment extends Fragment {
     private MapView mMapView;
     private GoogleMap mMap;
     private Bundle mBundle;
-    private Map<String, Long> idFromName;
+    private Map<String, Long> mIdFromMarker;
 
     private LatLng mCurLocation;
 
@@ -104,17 +104,17 @@ public class MapFragment extends Fragment {
 
     private void setUpMap() {
         mMap.setMyLocationEnabled(true);
-        idFromName = new HashMap<String, Long>();
+        mIdFromMarker = new HashMap<String, Long>();
         List<FriendData> allFriends = DBHelper.getOnlineFriends(getActivity());
         for (FriendData friendData : allFriends) {
             int resourceId = getActivity().getResources().getIdentifier("marker" + friendData.id,
                     "drawable", "ru.ifmo.findmyfriend");
-            idFromName.put(friendData.name, friendData.id);
-            mMap.addMarker(new MarkerOptions()
+            Marker marker = mMap.addMarker(new MarkerOptions()
                     .position(new LatLng(friendData.latitude, friendData.longitude))
                     .icon(BitmapDescriptorFactory.fromBitmap(getMarkerBitmap(resourceId)))
-                    .title(friendData.name))
-                    .setAnchor(0.5f, 1);
+                    .title(friendData.name));
+            marker.setAnchor(0.5f, 1);
+            mIdFromMarker.put(marker.getId(), friendData.id);
         }
 
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mCurLocation, 12));
@@ -122,7 +122,7 @@ public class MapFragment extends Fragment {
             @Override
             public void onInfoWindowClick(Marker marker) {
                 Intent browseIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://www.odnoklassniki.ru/profile/"
-                        + idFromName.get(marker.getTitle())));
+                        + mIdFromMarker.get(marker.getId())));
                 startActivity(browseIntent);
             }
         });
