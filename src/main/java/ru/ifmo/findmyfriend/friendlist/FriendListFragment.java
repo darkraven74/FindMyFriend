@@ -5,12 +5,13 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.ListView;
 
+import ru.ifmo.findmyfriend.DataSetChangeable;
 import ru.ifmo.findmyfriend.MainActivity;
 import ru.ifmo.findmyfriend.R;
 import ru.ifmo.findmyfriend.map.MapFragment;
 import ru.ifmo.findmyfriend.utils.DBHelper;
 
-public class FriendListFragment extends ListFragment {
+public class FriendListFragment extends ListFragment implements DataSetChangeable {
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -31,5 +32,9 @@ public class FriendListFragment extends ListFragment {
         MainActivity mainActivity = (MainActivity) getActivity();
         mainActivity.switchToFragment(mapFragment);
         mainActivity.setTitle(getResources().getString(R.string.menu_map));
+    }
+
+    @Override
+    public void notifyDataSetChanged() {
     }
 }

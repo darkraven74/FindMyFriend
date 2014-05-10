@@ -27,6 +27,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import ru.ifmo.findmyfriend.DataSetChangeable;
 import ru.ifmo.findmyfriend.R;
 import ru.ifmo.findmyfriend.friendlist.FriendData;
 import ru.ifmo.findmyfriend.utils.DBHelper;
@@ -35,7 +36,7 @@ import ru.ifmo.findmyfriend.utils.LocationUtils;
 /**
  * Created by: avgarder
  */
-public class MapFragment extends Fragment {
+public class MapFragment extends Fragment implements DataSetChangeable {
     public static final String BUNDLE_KEY_LONGITUDE = "bundle_key_longitude";
     public static final String BUNDLE_KEY_LATITUDE = "bundle_key_latitude";
 
@@ -126,6 +127,10 @@ public class MapFragment extends Fragment {
                 startActivity(browseIntent);
             }
         });
+    }
+
+    @Override
+    public void notifyDataSetChanged() {
     }
 
     @Override
