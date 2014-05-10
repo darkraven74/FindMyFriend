@@ -24,8 +24,10 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import ru.ifmo.findmyfriend.DataSetChangeable;
 import ru.ifmo.findmyfriend.R;
@@ -44,6 +46,7 @@ public class MapFragment extends Fragment implements DataSetChangeable {
     private GoogleMap mMap;
     private Bundle mBundle;
     private Map<String, Long> mIdFromMarker;
+    private Map<Long, Marker> mMarkerFromId;
 
     private LatLng mCurLocation;
 
@@ -104,20 +107,10 @@ public class MapFragment extends Fragment implements DataSetChangeable {
     }
 
     private void setUpMap() {
-        mMap.setMyLocationEnabled(true);
         mIdFromMarker = new HashMap<String, Long>();
-        List<FriendData> allFriends = DBHelper.getOnlineFriends(getActivity());
-        for (FriendData friendData : allFriends) {
-            int resourceId = getActivity().getResources().getIdentifier("marker" + friendData.id,
-                    "drawable", "ru.ifmo.findmyfriend");
-            Marker marker = mMap.addMarker(new MarkerOptions()
-                    .position(new LatLng(friendData.latitude, friendData.longitude))
-                    .icon(BitmapDescriptorFactory.fromBitmap(getMarkerBitmap(resourceId)))
-                    .title(friendData.name));
-            marker.setAnchor(0.5f, 1);
-            mIdFromMarker.put(marker.getId(), friendData.id);
-        }
-
+        mMarkerFromId = new HashMap<Long, Marker>();
+        updateMarkers();
+        mMap.setMyLocationEnabled(true);
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mCurLocation, 12));
         mMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
             @Override
@@ -129,8 +122,39 @@ public class MapFragment extends Fragment implements DataSetChangeable {
         });
     }
 
+    private void updateMarkers() {
+        List<FriendData> allFriends = DBHelper.getOnlineFriends(getActivity());
+        Set<Marker> markerSet = new HashSet<Marker>(mMarkerFromId.values());
+        for (FriendData friendData : allFriends) {
+            Marker marker = mMarkerFromId.get(friendData.id);
+            //TODO: images
+            int resourceId = getActivity().getResources().getIdentifier("marker" + friendData.id,
+                    "drawable", "ru.ifmo.findmyfriend");
+            if (marker != null) {
+                marker.setIcon(BitmapDescriptorFactory.fromBitmap(getMarkerBitmap(resourceId)));
+                marker.setPosition(new LatLng(friendData.latitude, friendData.longitude));
+            } else {
+                marker = mMap.addMarker(new MarkerOptions()
+                        .position(new LatLng(friendData.latitude, friendData.longitude))
+                        .icon(BitmapDescriptorFactory.fromBitmap(getMarkerBitmap(resourceId)))
+                        .title(friendData.name));
+                marker.setAnchor(0.5f, 1);
+                mIdFromMarker.put(marker.getId(), friendData.id);
+                mMarkerFromId.put(friendData.id, marker);
+            }
+            markerSet.remove(marker);
+        }
+        for (Marker marker : markerSet) {
+            String id = marker.getId();
+            mMarkerFromId.remove(mIdFromMarker.get(id));
+            mIdFromMarker.remove(id);
+            marker.remove();
+        }
+    }
+
     @Override
     public void notifyDataSetChanged() {
+        updateMarkers();
     }
 
     @Override
