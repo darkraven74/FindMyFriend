@@ -148,7 +148,7 @@ public class MainActivity extends Activity {
     /**
      * Fragment that appears in the "content_frame", shows a planet
      */
-    public static class TempFragment extends Fragment {
+    public static class TempFragment extends Fragment implements DataSetChangeable {
         public static final String ARG_FRAGMENT_NUMBER = "fragment_number";
 
         public TempFragment() {
@@ -165,6 +165,10 @@ public class MainActivity extends Activity {
             ((TextView) rootView.findViewById(R.id.text)).setText(text);
             getActivity().setTitle(text);
             return rootView;
+        }
+
+        @Override
+        public void notifyDataSetChanged() {
         }
     }
 
