@@ -2,9 +2,18 @@ package ru.ifmo.findmyfriend;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+
 import ru.ok.android.sdk.Odnoklassniki;
 import ru.ok.android.sdk.OkTokenRequestListener;
 import ru.ok.android.sdk.util.OkScope;
@@ -27,8 +36,29 @@ public class LoginActivity extends Activity implements OkTokenRequestListener {
 
     @Override
     public void onSuccess(String token) {
-        startActivity(new Intent(this, MainActivity.class));
-        finish();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                Map<String, String> requestParams = new HashMap<String, String>();
+                requestParams.put("fields", "uid, name, pic_5");
+                try {
+                    JSONObject info = new JSONObject(mOdnoklassniki.request("users.getCurrentUser", requestParams, "get"));
+                    SharedPreferences preferences = LoginActivity.this.getSharedPreferences(MainActivity.PREFERENCES_NAME, MODE_MULTI_PROCESS);
+                    preferences.edit()
+                            .putLong(MainActivity.PREFERENCE_CURRENT_UID, Long.parseLong(info.getString("uid")))
+                            .putString(MainActivity.PREFERENCE_CURRENT_NAME, info.getString("name"))
+                            .putString(MainActivity.PREFERENCE_CURRENT_IMG_URL, info.getString("pic_5"))
+                            .commit();
+                    startActivity(new Intent(LoginActivity.this, MainActivity.class));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                } finally {
+                    LoginActivity.this.finish();
+                }
+            }
+        }).start();
     }
 
     @Override

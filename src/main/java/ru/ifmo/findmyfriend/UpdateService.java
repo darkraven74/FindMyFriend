@@ -2,6 +2,7 @@ package ru.ifmo.findmyfriend;
 
 import android.app.IntentService;
 import android.content.Intent;
+import android.location.Location;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -21,12 +22,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 
 import ru.ifmo.findmyfriend.friendlist.FriendData;
 import ru.ifmo.findmyfriend.utils.DBHelper;
+import ru.ifmo.findmyfriend.utils.LocationUtils;
 import ru.ifmo.findmyfriend.utils.Logger;
-import ru.ifmo.findmyfriend.utils.OkFriends;
 import ru.ok.android.sdk.Odnoklassniki;
 
 public class UpdateService extends IntentService {
@@ -48,6 +48,20 @@ public class UpdateService extends IntentService {
     }
 
     private void sendOurCoordinates() {
+        Location location = LocationUtils.getLastBestLocation(this);
+        JSONObject json = new JSONObject();
+        long currentUid = getSharedPreferences(MainActivity.PREFERENCES_NAME, MODE_MULTI_PROCESS).getLong(MainActivity.PREFERENCE_CURRENT_UID, -1);
+        if (currentUid == -1) {
+            return;
+        }
+        try {
+            json.put("id", currentUid);
+            json.put("latitude", location.getLatitude());
+            json.put("longitude", location.getLongitude());
+            postJson(URL_POST_OUT_COORDS, json);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 
     private void updateFriendsCoordinates() {
@@ -93,15 +107,31 @@ public class UpdateService extends IntentService {
     private List<FriendData> getUserFriends() {
         Odnoklassniki ok = Odnoklassniki.getInstance(this);
         try {
-            List<FriendData> res = new OkFriends().execute(ok).get();
-            return res;
-        } catch (InterruptedException e) {
+            JSONArray friendsIdsArray = new JSONArray(ok.request("friends.get", null, "get"));
+            StringBuilder friendsIds = new StringBuilder();
+            for (int i = 0; i < friendsIdsArray.length(); i++) {
+                friendsIds.append(',').append(friendsIdsArray.getString(i));
+            }
+
+            Map<String, String> requestParams = new HashMap<String, String>();
+            requestParams.put("uids", friendsIds.substring(1));
+            requestParams.put("fields", "uid, name, pic_5");
+            String friendsInfo = ok.request("users.getInfo", requestParams, "get");
+
+            List<FriendData> friends = new ArrayList<FriendData>();
+            JSONArray friendsArray = new JSONArray(friendsInfo);
+            for (int i = 0; i < friendsArray.length(); i++) {
+                JSONObject friend = friendsArray.getJSONObject(i);
+                friends.add(new FriendData(Long.parseLong(friend.getString("uid")), friend.getString("name"),
+                        friend.getString("pic_5")));
+            }
+            return friends;
+        } catch (IOException e) {
             Logger.d(TAG, "getUserFriends", e);
-            return null;
-        } catch (ExecutionException e) {
+        } catch (JSONException e) {
             Logger.d(TAG, "getUserFriends", e);
-            return null;
         }
+        return null;
     }
 
     private JSONObject genIdsJson(List<FriendData> friends) {

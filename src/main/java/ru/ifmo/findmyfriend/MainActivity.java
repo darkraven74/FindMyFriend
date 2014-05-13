@@ -26,6 +26,12 @@ import ru.ifmo.findmyfriend.friendlist.FriendListFragment;
 import ru.ifmo.findmyfriend.map.MapFragment;
 
 public class MainActivity extends Activity {
+    public static final String PREFERENCES_NAME = MainActivity.class.getName();
+
+    public static final String PREFERENCE_CURRENT_UID = "current_uid";
+    public static final String PREFERENCE_CURRENT_NAME = "current_name";
+    public static final String PREFERENCE_CURRENT_IMG_URL = "current_pic";
+
     private DrawerLayout drawerLayout;
     private ListView drawerList;
     private ActionBarDrawerToggle drawerToggle;
