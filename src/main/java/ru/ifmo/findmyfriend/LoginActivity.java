@@ -20,38 +20,24 @@ public class LoginActivity extends Activity implements OkTokenRequestListener {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.login_activity);
-        startActivity(new Intent(this, MainActivity.class));
-        finish();
-//        mOdnoklassniki = Odnoklassniki.createInstance(getApplicationContext(), APP_ID, APP_SECRET_KEY, APP_PUBLIC_KEY);
-//        mOdnoklassniki.setTokenRequestListener(this);
+        mOdnoklassniki = Odnoklassniki.createInstance(getApplicationContext(), APP_ID, APP_SECRET_KEY, APP_PUBLIC_KEY);
+        mOdnoklassniki.setTokenRequestListener(this);
+        mOdnoklassniki.requestAuthorization(this, false, OkScope.VALUABLE_ACCESS);
     }
-
-//    @Override
-//    public void onDestroy() {
-//        mOdnoklassniki.removeTokenRequestListener();
-//        super.onDestroy();
-//    }
 
     @Override
     public void onSuccess(String token) {
-        Log.v("APIOK", "auth success! token: " + token);
         startActivity(new Intent(this, MainActivity.class));
-        //startActivity(new Intent(MainActivity.this, MainActivity.class));
         finish();
     }
 
     @Override
     public void onError() {
-        Log.v("APIOK", "auth error");
+        finish();
     }
 
     @Override
     public void onCancel() {
-        Log.v("APIOK", "auth cancel");
-    }
-
-    public void clickLogin(View view) {
-        Log.v("APIOK", "loginButton clicked");
-        mOdnoklassniki.requestAuthorization(this, false, OkScope.VALUABLE_ACCESS);
+        finish();
     }
 }

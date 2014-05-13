@@ -10,12 +10,14 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,8 +34,8 @@ public class UpdateService extends IntentService {
 
     public static final String ACTION_DATA_UPDATED = "ru.ifmo.findmyfriend.ACTION_DATA_UPDATED";
 
-    private static final String URL_GET_FRIENDS_COORDS = "https://localhost:8443/get/coordinats";
-    private static final String URL_POST_OUT_COORDS = "https://localhost:8443/post/coordinats";
+    private static final String URL_GET_FRIENDS_COORDS = "http://192.243.125.239:9031/get/coordinates";
+    private static final String URL_POST_OUT_COORDS = "http://192.243.125.239:9031/post/coordinates";
 
     public UpdateService() {
         super(TAG);
@@ -54,15 +56,16 @@ public class UpdateService extends IntentService {
         if (friends == null) {
             return;
         }
+        List<FriendData> updatedFriends = new ArrayList<FriendData>();
         Map<Long, FriendData> friendById = new HashMap<Long, FriendData>();
         for (FriendData friend : friends) {
             friendById.put(friend.id, friend);
         }
         JSONObject idsJson = genIdsJson(friends);
-        HttpEntity entity = sendJson(URL_GET_FRIENDS_COORDS, idsJson);
+        HttpEntity entity = postJson(URL_GET_FRIENDS_COORDS, idsJson);
         try {
-            JSONObject resJson = new JSONObject(entity.toString());
-            JSONArray result = resJson.getJSONArray("result");
+            JSONObject resJson = new JSONObject(EntityUtils.toString(entity));
+            JSONArray result = resJson.getJSONArray("users");
             for (int i = 0; i < result.length(); i++) {
                 JSONObject user = result.getJSONObject(i);
                 long id = user.getLong("id");
@@ -73,11 +76,16 @@ public class UpdateService extends IntentService {
                     friend.latitude = user.getDouble("latitude");
                     friend.longitude = user.getDouble("longitude");
                 }
+                updatedFriends.add(friend);
             }
         } catch (JSONException e) {
-            e.printStackTrace();
+            Logger.d(TAG, "updateFriendsCoordinates", e);
+            return;
+        } catch (IOException e) {
+            Logger.d(TAG, "updateFriendsCoordinates", e);
+            return;
         }
-        DBHelper.mapToDb(this, friends);
+        DBHelper.save(this, updatedFriends);
         Intent intent = new Intent(ACTION_DATA_UPDATED);
         sendBroadcast(intent);
     }
@@ -111,7 +119,7 @@ public class UpdateService extends IntentService {
         return resJson;
     }
 
-    private HttpEntity sendJson(String url, JSONObject json) {
+    private HttpEntity postJson(String url, JSONObject json) {
         HttpClient client = new DefaultHttpClient();
         HttpPost request = new HttpPost(url);
         StringEntity entity;
@@ -121,16 +129,17 @@ public class UpdateService extends IntentService {
             throw new AssertionError();
         }
         request.setEntity(entity);
-        HttpResponse response = null;
+        request.addHeader("Content-Type", "application/json");
+        HttpResponse response;
         try {
             response = client.execute(request);
         } catch (IOException e) {
-            Logger.d(TAG, "sendJson", e);
+            Logger.d(TAG, "postJson", e);
             return null;
         }
         int status = response.getStatusLine().getStatusCode();
         if (status != HttpStatus.SC_OK) {
-            Logger.d(TAG, "sendJson; Http error " + status);
+            Logger.d(TAG, "postJson; Http error " + status);
             return null;
         }
         return response.getEntity();
