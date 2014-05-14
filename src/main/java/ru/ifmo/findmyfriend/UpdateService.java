@@ -25,7 +25,7 @@ import java.util.Map;
 
 import ru.ifmo.findmyfriend.friendlist.FriendData;
 import ru.ifmo.findmyfriend.utils.DBHelper;
-import ru.ifmo.findmyfriend.utils.LocationUtils;
+import ru.ifmo.findmyfriend.utils.Utils;
 import ru.ifmo.findmyfriend.utils.Logger;
 import ru.ok.android.sdk.Odnoklassniki;
 
@@ -34,8 +34,16 @@ public class UpdateService extends IntentService {
 
     public static final String ACTION_DATA_UPDATED = "ru.ifmo.findmyfriend.ACTION_DATA_UPDATED";
 
+    public static final String EXTRA_TASK_ID = "task_id";
+    public static final String EXTRA_DURATION = "duration";
+
+    public static final int TASK_SEND_OUR_COORDS = 1;
+    public static final int TASK_UPDATE_FRIENDS_COORDS = 2;
+    public static final int TASK_SEND_DURATION = 3;
+
     private static final String URL_GET_FRIENDS_COORDS = "http://192.243.125.239:9031/get/coordinates";
-    private static final String URL_POST_OUT_COORDS = "http://192.243.125.239:9031/post/coordinates";
+    private static final String URL_POST_OUR_COORDS = "http://192.243.125.239:9031/post/coordinates";
+    private static final String URL_POST_DURATION = "http://192.243.125.239:9031/post/duration";
 
     public UpdateService() {
         super(TAG);
@@ -43,25 +51,55 @@ public class UpdateService extends IntentService {
 
     @Override
     protected void onHandleIntent(Intent intent) {
-        sendOurCoordinates();
-        updateFriendsCoordinates();
+        int taskType = intent.getIntExtra(EXTRA_TASK_ID, -1);
+        switch (taskType) {
+            case TASK_SEND_OUR_COORDS:
+                sendOurCoordinates();
+                break;
+            case TASK_UPDATE_FRIENDS_COORDS:
+                updateFriendsCoordinates();
+                break;
+            case TASK_SEND_DURATION:
+                long duration = intent.getLongExtra(EXTRA_DURATION, -1);
+                if (duration < 0) {
+                    Logger.d(TAG, "Invalid duration: " + duration);
+                } else {
+                    sendDuration(duration);
+                    break;
+                }
+            default:
+                Logger.d(TAG, "Invalid task type: " + taskType);
+        }
     }
 
     private void sendOurCoordinates() {
-        Location location = LocationUtils.getLastBestLocation(this);
-        JSONObject json = new JSONObject();
-        long currentUid = getSharedPreferences(MainActivity.PREFERENCES_NAME, MODE_MULTI_PROCESS).getLong(MainActivity.PREFERENCE_CURRENT_UID, -1);
+        Location location = Utils.getLastBestLocation(this);
+        JSONObject dataJson = new JSONObject();
+        long currentUid = Utils.getCurrentUserId(this);
         if (currentUid == -1) {
             return;
         }
         try {
-            json.put("id", currentUid);
-            json.put("latitude", location.getLatitude());
-            json.put("longitude", location.getLongitude());
-            postJson(URL_POST_OUT_COORDS, json);
-        } catch (JSONException e) {
-            e.printStackTrace();
+            dataJson.put("id", currentUid);
+            dataJson.put("latitude", location.getLatitude());
+            dataJson.put("longitude", location.getLongitude());
+        } catch (JSONException ignored) {
         }
+        postJson(URL_POST_OUR_COORDS, dataJson);
+    }
+
+    private void sendDuration(long duration) {
+        long currentUid = Utils.getCurrentUserId(this);
+        if (currentUid == -1) {
+            return;
+        }
+        JSONObject dataJson = new JSONObject();
+        try {
+            dataJson.put("id", currentUid);
+            dataJson.put("duration", duration);
+        } catch (JSONException ignored) {
+        }
+        postJson(URL_POST_DURATION, dataJson);
     }
 
     private void updateFriendsCoordinates() {

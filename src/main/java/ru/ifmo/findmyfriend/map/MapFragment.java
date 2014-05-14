@@ -31,7 +31,7 @@ import ru.ifmo.findmyfriend.DataSetChangeable;
 import ru.ifmo.findmyfriend.R;
 import ru.ifmo.findmyfriend.friendlist.FriendData;
 import ru.ifmo.findmyfriend.utils.DBHelper;
-import ru.ifmo.findmyfriend.utils.LocationUtils;
+import ru.ifmo.findmyfriend.utils.Utils;
 
 /**
  * Created by: avgarder
@@ -53,7 +53,7 @@ public class MapFragment extends Fragment implements DataSetChangeable {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mBundle = savedInstanceState;
-        Location location = LocationUtils.getLastBestLocation(getActivity());
+        Location location = Utils.getLastBestLocation(getActivity());
         mCurLocation = new LatLng(location.getLatitude(), location.getLongitude());
 
         Bundle args = getArguments();
