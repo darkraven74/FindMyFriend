@@ -45,8 +45,8 @@ public class MapFragment extends Fragment implements DataSetChangeable {
     private MapView mMapView;
     private GoogleMap mMap;
     private Bundle mBundle;
-    private Map<String, Long> mIdFromMarker;
-    private Map<Long, Marker> mMarkerFromId;
+    private Map<String, Long> mUserIdFromMarkerId;
+    private Map<Long, Marker> mMarkerFromUserId;
 
     private LatLng mCurLocation;
 
@@ -107,8 +107,8 @@ public class MapFragment extends Fragment implements DataSetChangeable {
     }
 
     private void setUpMap() {
-        mIdFromMarker = new HashMap<String, Long>();
-        mMarkerFromId = new HashMap<Long, Marker>();
+        mUserIdFromMarkerId = new HashMap<String, Long>();
+        mMarkerFromUserId = new HashMap<Long, Marker>();
         updateMarkers();
         mMap.setMyLocationEnabled(true);
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mCurLocation, 12));
@@ -116,7 +116,7 @@ public class MapFragment extends Fragment implements DataSetChangeable {
             @Override
             public void onInfoWindowClick(Marker marker) {
                 Intent browseIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://www.odnoklassniki.ru/profile/"
-                        + mIdFromMarker.get(marker.getId())));
+                        + mUserIdFromMarkerId.get(marker.getId())));
                 startActivity(browseIntent);
             }
         });
@@ -124,30 +124,30 @@ public class MapFragment extends Fragment implements DataSetChangeable {
 
     private void updateMarkers() {
         List<FriendData> allFriends = DBHelper.getOnlineFriends(getActivity());
-        Set<Marker> markerSet = new HashSet<Marker>(mMarkerFromId.values());
+        Set<Marker> outdatedMarkers = new HashSet<Marker>(mMarkerFromUserId.values());
         for (FriendData friendData : allFriends) {
-            Marker marker = mMarkerFromId.get(friendData.id);
+            Marker marker = mMarkerFromUserId.get(friendData.id);
             //TODO: images
             int resourceId = getActivity().getResources().getIdentifier("marker" + friendData.id,
                     "drawable", "ru.ifmo.findmyfriend");
             if (marker != null) {
                 marker.setIcon(BitmapDescriptorFactory.fromBitmap(getMarkerBitmap(resourceId)));
                 marker.setPosition(new LatLng(friendData.latitude, friendData.longitude));
+                outdatedMarkers.remove(marker);
             } else {
                 marker = mMap.addMarker(new MarkerOptions()
                         .position(new LatLng(friendData.latitude, friendData.longitude))
                         .icon(BitmapDescriptorFactory.fromBitmap(getMarkerBitmap(resourceId)))
                         .title(friendData.name));
                 marker.setAnchor(0.5f, 1);
-                mIdFromMarker.put(marker.getId(), friendData.id);
-                mMarkerFromId.put(friendData.id, marker);
+                mUserIdFromMarkerId.put(marker.getId(), friendData.id);
+                mMarkerFromUserId.put(friendData.id, marker);
             }
-            markerSet.remove(marker);
         }
-        for (Marker marker : markerSet) {
-            String id = marker.getId();
-            mMarkerFromId.remove(mIdFromMarker.get(id));
-            mIdFromMarker.remove(id);
+        for (Marker marker : outdatedMarkers) {
+            String markerId = marker.getId();
+            mMarkerFromUserId.remove(mUserIdFromMarkerId.get(markerId));
+            mUserIdFromMarkerId.remove(markerId);
             marker.remove();
         }
     }
