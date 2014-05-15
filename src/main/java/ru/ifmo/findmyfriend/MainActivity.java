@@ -24,10 +24,11 @@ import android.widget.TextView;
 
 import ru.ifmo.findmyfriend.friendlist.FriendListFragment;
 import ru.ifmo.findmyfriend.map.MapFragment;
+import ru.ifmo.findmyfriend.settings.MyLocationFragment;
 
 public class MainActivity extends Activity {
     public static final String PREFERENCES_NAME = MainActivity.class.getName();
-
+    public static final String PREFERENCE_SHARING_END_TIME = "sharing_end_time";
     public static final String PREFERENCE_CURRENT_UID = "current_uid";
     public static final String PREFERENCE_CURRENT_NAME = "current_name";
     public static final String PREFERENCE_CURRENT_IMG_URL = "current_pic";
@@ -107,7 +108,6 @@ public class MainActivity extends Activity {
         return super.onOptionsItemSelected(item);
     }
 
-    /* The click listner for ListView in the navigation drawer */
     private class DrawerItemClickListener implements ListView.OnItemClickListener {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -116,7 +116,6 @@ public class MainActivity extends Activity {
     }
 
     private void selectItem(int position) {
-        // update the main content by replacing fragments
 
         FragmentManager fragmentManager = getFragmentManager();
         switch (position) {
@@ -125,6 +124,9 @@ public class MainActivity extends Activity {
                 break;
             case 1:
                 switchToFragment(new FriendListFragment());
+                break;
+            case 2:
+                switchToFragment(new MyLocationFragment());
                 break;
             default:
                 Fragment tempFragment = new TempFragment();
@@ -153,11 +155,6 @@ public class MainActivity extends Activity {
         getActionBar().setTitle(this.title);
     }
 
-    /**
-     * When using the ActionBarDrawerToggle, you must call it during
-     * onPostCreate() and onConfigurationChanged()...
-     */
-
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
@@ -179,9 +176,6 @@ public class MainActivity extends Activity {
         }
     }
 
-    /**
-     * Fragment that appears in the "content_frame", shows a planet
-     */
     public static class TempFragment extends Fragment implements DataSetChangeable {
         public static final String ARG_FRAGMENT_NUMBER = "fragment_number";
 
@@ -205,6 +199,4 @@ public class MainActivity extends Activity {
         public void notifyDataSetChanged() {
         }
     }
-
-
 }
