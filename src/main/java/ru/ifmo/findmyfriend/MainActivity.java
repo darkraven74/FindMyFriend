@@ -28,6 +28,7 @@ import ru.ifmo.findmyfriend.settings.MyLocationFragment;
 
 public class MainActivity extends Activity {
     public static final String PREFERENCES_NAME = MainActivity.class.getName();
+    public static final String PREFERENCE_SHARING_END_TIME = "sharingEndTime";
 
     private DrawerLayout drawerLayout;
     private ListView drawerList;

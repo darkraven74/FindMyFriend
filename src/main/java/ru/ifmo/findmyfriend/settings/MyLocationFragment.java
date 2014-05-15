@@ -9,6 +9,7 @@ import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.text.format.DateFormat;
 import android.view.LayoutInflater;
@@ -28,8 +29,6 @@ import ru.ifmo.findmyfriend.MainActivity;
 import ru.ifmo.findmyfriend.R;
 
 public class MyLocationFragment extends Fragment implements DataSetChangeable, View.OnClickListener {
-    private static final String PREFERENCE_SHARING_UNTIL = "sharingUntil";
-
     private static final long[] sharingDurations = new long[]{TimeUnit.MINUTES.toMillis(30),
             TimeUnit.HOURS.toMillis(1), TimeUnit.HOURS.toMillis(2), TimeUnit.HOURS.toMillis(5)};
 
@@ -39,9 +38,6 @@ public class MyLocationFragment extends Fragment implements DataSetChangeable, V
     private SharedPreferences prefs;
 
     private final Calendar customDuration = Calendar.getInstance();
-
-    public MyLocationFragment() {
-    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -121,12 +117,12 @@ public class MyLocationFragment extends Fragment implements DataSetChangeable, V
     }
 
     private void setSharingTime(long time) {
-        prefs.edit().putLong(PREFERENCE_SHARING_UNTIL, time).commit();
+        prefs.edit().putLong(MainActivity.PREFERENCE_SHARING_END_TIME, time).commit();
         updateState();
     }
 
     private void updateState() {
-        long time = prefs.getLong(PREFERENCE_SHARING_UNTIL, 0);
+        long time = prefs.getLong(MainActivity.PREFERENCE_SHARING_END_TIME, 0);
         if (System.currentTimeMillis() > time) {
             status.setText(R.string.not_sharing);
             cancel.setVisibility(View.GONE);
