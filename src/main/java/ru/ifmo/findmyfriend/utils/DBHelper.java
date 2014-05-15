@@ -54,7 +54,10 @@ public class DBHelper extends SQLiteOpenHelper {
         onCreate(db);
     }
 
-    public static void mapToDb(Context context, List<FriendData> friends) {
+    public static void save(Context context, List<FriendData> friends) {
+        if (friends == null || friends.isEmpty()) {
+            return;
+        }
         String queryFormat = "INSERT OR REPLACE INTO " + TABLE_FRIENDS + "(" +
                 ID + "," + NAME + "," + LATITUDE + "," + LONGITUDE + "," + IMAGE_URL + "," + IS_ALIVE + "," + UPDATE_TIME +
                 ") VALUES (%d, %s, %f, %f, %s, %d, %d);";

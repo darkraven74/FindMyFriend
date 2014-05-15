@@ -28,7 +28,10 @@ import ru.ifmo.findmyfriend.settings.MyLocationFragment;
 
 public class MainActivity extends Activity {
     public static final String PREFERENCES_NAME = MainActivity.class.getName();
-    public static final String PREFERENCE_SHARING_END_TIME = "sharingEndTime";
+    public static final String PREFERENCE_SHARING_END_TIME = "sharing_end_time";
+    public static final String PREFERENCE_CURRENT_UID = "current_uid";
+    public static final String PREFERENCE_CURRENT_NAME = "current_name";
+    public static final String PREFERENCE_CURRENT_IMG_URL = "current_pic";
 
     private DrawerLayout drawerLayout;
     private ListView drawerList;
@@ -196,5 +199,4 @@ public class MainActivity extends Activity {
         public void notifyDataSetChanged() {
         }
     }
-
 }

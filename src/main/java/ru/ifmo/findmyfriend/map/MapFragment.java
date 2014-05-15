@@ -24,14 +24,16 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import ru.ifmo.findmyfriend.DataSetChangeable;
 import ru.ifmo.findmyfriend.R;
 import ru.ifmo.findmyfriend.friendlist.FriendData;
 import ru.ifmo.findmyfriend.utils.DBHelper;
-import ru.ifmo.findmyfriend.utils.LocationUtils;
+import ru.ifmo.findmyfriend.utils.Utils;
 
 /**
  * Created by: avgarder
@@ -43,7 +45,8 @@ public class MapFragment extends Fragment implements DataSetChangeable {
     private MapView mMapView;
     private GoogleMap mMap;
     private Bundle mBundle;
-    private Map<String, Long> mIdFromMarker;
+    private Map<String, Long> mUserIdFromMarkerId;
+    private Map<Long, Marker> mMarkerFromUserId;
 
     private LatLng mCurLocation;
 
@@ -53,7 +56,7 @@ public class MapFragment extends Fragment implements DataSetChangeable {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mBundle = savedInstanceState;
-        Location location = LocationUtils.getLastBestLocation(getActivity());
+        Location location = Utils.getLastBestLocation(getActivity());
         mCurLocation = new LatLng(location.getLatitude(), location.getLongitude());
 
         Bundle args = getArguments();
@@ -104,33 +107,54 @@ public class MapFragment extends Fragment implements DataSetChangeable {
     }
 
     private void setUpMap() {
+        mUserIdFromMarkerId = new HashMap<String, Long>();
+        mMarkerFromUserId = new HashMap<Long, Marker>();
+        updateMarkers();
         mMap.setMyLocationEnabled(true);
-        mIdFromMarker = new HashMap<String, Long>();
-        List<FriendData> allFriends = DBHelper.getOnlineFriends(getActivity());
-        for (FriendData friendData : allFriends) {
-            int resourceId = getActivity().getResources().getIdentifier("marker" + friendData.id,
-                    "drawable", "ru.ifmo.findmyfriend");
-            Marker marker = mMap.addMarker(new MarkerOptions()
-                    .position(new LatLng(friendData.latitude, friendData.longitude))
-                    .icon(BitmapDescriptorFactory.fromBitmap(getMarkerBitmap(resourceId)))
-                    .title(friendData.name));
-            marker.setAnchor(0.5f, 1);
-            mIdFromMarker.put(marker.getId(), friendData.id);
-        }
-
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mCurLocation, 12));
         mMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
             @Override
             public void onInfoWindowClick(Marker marker) {
                 Intent browseIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://www.odnoklassniki.ru/profile/"
-                        + mIdFromMarker.get(marker.getId())));
+                        + mUserIdFromMarkerId.get(marker.getId())));
                 startActivity(browseIntent);
             }
         });
     }
 
+    private void updateMarkers() {
+        List<FriendData> allFriends = DBHelper.getOnlineFriends(getActivity());
+        Set<Marker> outdatedMarkers = new HashSet<Marker>(mMarkerFromUserId.values());
+        for (FriendData friendData : allFriends) {
+            Marker marker = mMarkerFromUserId.get(friendData.id);
+            //TODO: images
+            int resourceId = getActivity().getResources().getIdentifier("marker" + friendData.id,
+                    "drawable", "ru.ifmo.findmyfriend");
+            if (marker != null) {
+                marker.setIcon(BitmapDescriptorFactory.fromBitmap(getMarkerBitmap(resourceId)));
+                marker.setPosition(new LatLng(friendData.latitude, friendData.longitude));
+                outdatedMarkers.remove(marker);
+            } else {
+                marker = mMap.addMarker(new MarkerOptions()
+                        .position(new LatLng(friendData.latitude, friendData.longitude))
+                        .icon(BitmapDescriptorFactory.fromBitmap(getMarkerBitmap(resourceId)))
+                        .title(friendData.name));
+                marker.setAnchor(0.5f, 1);
+                mUserIdFromMarkerId.put(marker.getId(), friendData.id);
+                mMarkerFromUserId.put(friendData.id, marker);
+            }
+        }
+        for (Marker marker : outdatedMarkers) {
+            String markerId = marker.getId();
+            mMarkerFromUserId.remove(mUserIdFromMarkerId.get(markerId));
+            mUserIdFromMarkerId.remove(markerId);
+            marker.remove();
+        }
+    }
+
     @Override
     public void notifyDataSetChanged() {
+        updateMarkers();
     }
 
     @Override

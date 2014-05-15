@@ -1,15 +1,18 @@
 package ru.ifmo.findmyfriend.utils;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.location.Location;
 import android.location.LocationManager;
 
 import java.util.List;
 
+import ru.ifmo.findmyfriend.MainActivity;
+
 /**
  * Created by: avgarder
  */
-public class LocationUtils {
+public class Utils {
     public static Location getLastBestLocation(Context context) {
         LocationManager locManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
 
@@ -35,5 +38,11 @@ public class LocationUtils {
             }
         }
         return bestResult;
+    }
+
+    public static long getCurrentUserId(Context context) {
+        SharedPreferences preferences =
+                context.getSharedPreferences(MainActivity.PREFERENCES_NAME, Context.MODE_MULTI_PROCESS);
+        return preferences.getLong(MainActivity.PREFERENCE_CURRENT_UID, -1);
     }
 }
