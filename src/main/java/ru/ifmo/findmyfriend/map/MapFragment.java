@@ -32,13 +32,14 @@ import java.util.Set;
 import ru.ifmo.findmyfriend.FriendsStatusListener;
 import ru.ifmo.findmyfriend.R;
 import ru.ifmo.findmyfriend.friendlist.FriendData;
+import ru.ifmo.findmyfriend.utils.BitmapStorage;
 import ru.ifmo.findmyfriend.utils.DBHelper;
 import ru.ifmo.findmyfriend.utils.Utils;
 
 /**
  * Created by: avgarder
  */
-public class MapFragment extends Fragment implements FriendsStatusListener {
+public class MapFragment extends Fragment implements FriendsStatusListener, BitmapStorage.BitmapLoadListener {
     public static final String BUNDLE_KEY_LONGITUDE = "bundle_key_longitude";
     public static final String BUNDLE_KEY_LATITUDE = "bundle_key_latitude";
 
@@ -158,15 +159,22 @@ public class MapFragment extends Fragment implements FriendsStatusListener {
     }
 
     @Override
+    public void onBitmapLoaded(String url) {
+        updateMarkers();
+    }
+
+    @Override
     public void onResume() {
         super.onResume();
         mMapView.onResume();
+        BitmapStorage.getInstance().addListener(this);
     }
 
     @Override
     public void onPause() {
         super.onPause();
         mMapView.onPause();
+        BitmapStorage.getInstance().removeListener(this);
     }
 
     @Override
