@@ -27,7 +27,7 @@ public class DBHelper extends SQLiteOpenHelper {
 
     public static final long ALIVE_INTERVAL = TimeUnit.MINUTES.toMillis(15);
 
-    private static final int VERSION = 2;
+    private static final int VERSION = 3;
 
     public DBHelper(Context context) {
         super(context, "mainDB", null, VERSION);
@@ -44,8 +44,6 @@ public class DBHelper extends SQLiteOpenHelper {
                 IS_ALIVE + " INTEGER," +
                 UPDATE_TIME + " LONG" +
                 ");");
-
-        insertTempData(db);
     }
 
     @Override
@@ -60,14 +58,15 @@ public class DBHelper extends SQLiteOpenHelper {
         }
         String queryFormat = "INSERT OR REPLACE INTO " + TABLE_FRIENDS + "(" +
                 ID + "," + NAME + "," + LATITUDE + "," + LONGITUDE + "," + IMAGE_URL + "," + IS_ALIVE + "," + UPDATE_TIME +
-                ") VALUES (%d, %s, %f, %f, %s, %d, %d);";
+                ") VALUES (%d, \"%s\", %f, %f, \"%s\", %d, %d);";
         SQLiteDatabase db = new DBHelper(context).getWritableDatabase();
-        db.beginTransaction();
+//        db.beginTransaction();
         for (FriendData friend : friends) {
-            db.execSQL(String.format(queryFormat, friend.id, friend.name, friend.latitude, friend.longitude,
-                    friend.imageUrl, friend.isAlive ? 1 : 0, friend.updateTime));
+            String query = String.format(queryFormat, friend.id, friend.name, friend.latitude, friend.longitude,
+                    friend.imageUrl, friend.isAlive ? 1 : 0, friend.updateTime);
+            db.execSQL(query);
         }
-        db.endTransaction();
+//        db.endTransaction();
         db.close();
     }
 
@@ -110,13 +109,5 @@ public class DBHelper extends SQLiteOpenHelper {
             res.add(data);
         } while (c.moveToNext());
         return res;
-    }
-
-    private void insertTempData(SQLiteDatabase db) {
-        db.execSQL("INSERT INTO friends VALUES (1, \"Марина Васильева\", 59.9570072, 30.2729272, \"\", 1, 0);");
-        db.execSQL("INSERT INTO friends VALUES (2, \"Артем Комаров\", 59.9676194, 30.384112, \"\", 1, 0);");
-        db.execSQL("INSERT INTO friends VALUES (3, \"Николай Иванов\", 59.9411471, 30.3793913, \"\", 1, 0);");
-        db.execSQL("INSERT INTO friends VALUES (4, \"Эдгар Кузнецов\", 59.9235158, 30.3332144, \"\", 1, -1);");
-        db.execSQL("INSERT INTO friends VALUES (5, \"Наталья Костенева\", 59.9232577, 30.2954489, \"\", 0, 0);");
     }
 }

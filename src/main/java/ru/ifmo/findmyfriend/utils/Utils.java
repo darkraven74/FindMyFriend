@@ -5,6 +5,9 @@ import android.content.SharedPreferences;
 import android.location.Location;
 import android.location.LocationManager;
 
+import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
 import ru.ifmo.findmyfriend.MainActivity;
@@ -44,5 +47,16 @@ public class Utils {
         SharedPreferences preferences =
                 context.getSharedPreferences(MainActivity.PREFERENCES_NAME, Context.MODE_MULTI_PROCESS);
         return preferences.getLong(MainActivity.PREFERENCE_CURRENT_UID, -1);
+    }
+
+    public static String md5Hash(String s) {
+        try {
+            MessageDigest md5 = MessageDigest.getInstance("MD5");
+            md5.update(s.getBytes());
+            byte[] hashed = md5.digest();
+            return new BigInteger(1, hashed).toString(16);
+        } catch (NoSuchAlgorithmException e) {
+            throw new AssertionError(e.getMessage());
+        }
     }
 }
