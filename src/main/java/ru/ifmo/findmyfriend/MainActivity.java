@@ -81,7 +81,7 @@ public class MainActivity extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
-        IntentFilter filter = new IntentFilter(UpdateService.ACTION_FRIENDS_STATUS_UPDATED);
+        IntentFilter filter = new IntentFilter(UpdateService.ACTION_DATA_CHANGE);
         registerReceiver(updateReceiver, filter);
     }
 
@@ -177,8 +177,8 @@ public class MainActivity extends Activity {
     private class UpdateReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (currentFragment instanceof FriendsStatusListener) {
-                ((FriendsStatusListener) currentFragment).onFriendsStatusUpdated();
+            if (currentFragment instanceof DataChangeListener) {
+                ((DataChangeListener) currentFragment).onDataChange();
             }
         }
     }

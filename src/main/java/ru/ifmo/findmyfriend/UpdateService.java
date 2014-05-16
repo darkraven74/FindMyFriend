@@ -34,7 +34,7 @@ import ru.ok.android.sdk.Odnoklassniki;
 public class UpdateService extends IntentService {
     private static final String LOG_TAG = UpdateService.class.getName();
 
-    public static final String ACTION_FRIENDS_STATUS_UPDATED = "ru.ifmo.findmyfriend.ACTION_FRIENDS_STATUS_UPDATED";
+    public static final String ACTION_DATA_CHANGE = "ru.ifmo.findmyfriend.ACTION_DATA_CHANGE";
 
     public static final String EXTRA_TASK_ID = "task_id";
     public static final String EXTRA_DURATION = "duration";
@@ -44,8 +44,8 @@ public class UpdateService extends IntentService {
     public static final int TASK_UPDATE_FRIENDS_INFO = 3;
     public static final int TASK_SEND_DURATION = 4;
 
-    private static final String URL_GET_FRIENDS_COORDS = "http://192.243.125.239:9031/get/coordinates";
-    private static final String URL_POST_OUR_COORDS = "http://192.243.125.239:9031/post/coordinates";
+    private static final String URL_GET_FRIENDS_COORDINATES = "http://192.243.125.239:9031/get/coordinates";
+    private static final String URL_POST_OUR_COORDINATES = "http://192.243.125.239:9031/post/coordinates";
     private static final String URL_POST_DURATION = "http://192.243.125.239:9031/post/duration";
 
     public UpdateService() {
@@ -91,7 +91,7 @@ public class UpdateService extends IntentService {
             dataJson.put("longitude", location.getLongitude());
         } catch (JSONException ignored) {
         }
-        postJson(URL_POST_OUR_COORDS, dataJson);
+        postJson(URL_POST_OUR_COORDINATES, dataJson);
     }
 
     private void sendDuration(long duration) {
@@ -119,7 +119,7 @@ public class UpdateService extends IntentService {
             friendById.put(friend.id, friend);
         }
         JSONObject idsJson = genIdsJson(friends);
-        HttpEntity entity = postJson(URL_GET_FRIENDS_COORDS, idsJson);
+        HttpEntity entity = postJson(URL_GET_FRIENDS_COORDINATES, idsJson);
         try {
             JSONObject resJson = new JSONObject(EntityUtils.toString(entity));
             JSONArray result = resJson.getJSONArray("users");
@@ -142,8 +142,7 @@ public class UpdateService extends IntentService {
             return;
         }
         DBHelper.saveFriendsStatus(this, friends);
-        Intent intent = new Intent(ACTION_FRIENDS_STATUS_UPDATED);
-        sendBroadcast(intent);
+        sendBroadcast(new Intent(ACTION_DATA_CHANGE));
     }
 
     private void updateFriendsInfo() {
@@ -173,6 +172,7 @@ public class UpdateService extends IntentService {
                 }
             }
             DBHelper.saveFriendsInfo(this, friends);
+            sendBroadcast(new Intent(ACTION_DATA_CHANGE));
         } catch (IOException e) {
             Logger.d(LOG_TAG, "updateFriendsInfo", e);
         } catch (JSONException e) {

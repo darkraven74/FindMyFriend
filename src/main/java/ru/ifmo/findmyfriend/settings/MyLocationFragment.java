@@ -23,7 +23,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
-import ru.ifmo.findmyfriend.FriendsStatusListener;
 import ru.ifmo.findmyfriend.MainActivity;
 import ru.ifmo.findmyfriend.R;
 
