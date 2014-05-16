@@ -121,7 +121,7 @@ public class MapFragment extends Fragment implements DataSetChangeable, BitmapSt
     }
 
     private void updateMarkers() {
-        List<FriendData> allFriends = DBHelper.getAllFriends(getActivity());
+        List<FriendData> allFriends = DBHelper.getOnlineFriends(getActivity());
         Set<Marker> outdatedMarkers = new HashSet<Marker>(markerFromUserId.values());
         for (FriendData friendData : allFriends) {
             Bitmap userImage = BitmapStorage.getInstance().getBitmap(getActivity(), friendData.imageUrl);
