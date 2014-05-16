@@ -25,6 +25,7 @@ import android.widget.TextView;
 import ru.ifmo.findmyfriend.friendlist.FriendListFragment;
 import ru.ifmo.findmyfriend.map.MapFragment;
 import ru.ifmo.findmyfriend.settings.MyLocationFragment;
+import ru.ifmo.findmyfriend.utils.BitmapStorage;
 
 public class MainActivity extends Activity {
     public static final String PREFERENCES_NAME = MainActivity.class.getName();
@@ -45,6 +46,9 @@ public class MainActivity extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Intent intent = new Intent(this, UpdateService.class);
+        intent.putExtra(UpdateService.EXTRA_TASK_ID, UpdateService.TASK_UPDATE_FRIENDS_COORDS);
+        startService(intent);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_activity);
 
@@ -88,6 +92,12 @@ public class MainActivity extends Activity {
     protected void onPause() {
         super.onPause();
         unregisterReceiver(updateReceiver);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        BitmapStorage.getInstance().clearAll(this);
     }
 
     @Override

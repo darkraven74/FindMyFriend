@@ -25,12 +25,14 @@ import java.util.Map;
 
 import ru.ifmo.findmyfriend.friendlist.FriendData;
 import ru.ifmo.findmyfriend.utils.DBHelper;
+import ru.ifmo.findmyfriend.utils.ImageDownloader;
+import ru.ifmo.findmyfriend.utils.ImageStorage;
 import ru.ifmo.findmyfriend.utils.Utils;
 import ru.ifmo.findmyfriend.utils.Logger;
 import ru.ok.android.sdk.Odnoklassniki;
 
 public class UpdateService extends IntentService {
-    private static final String TAG = UpdateService.class.getName();
+    private static final String LOG_TAG = UpdateService.class.getName();
 
     public static final String ACTION_DATA_UPDATED = "ru.ifmo.findmyfriend.ACTION_DATA_UPDATED";
 
@@ -46,7 +48,7 @@ public class UpdateService extends IntentService {
     private static final String URL_POST_DURATION = "http://192.243.125.239:9031/post/duration";
 
     public UpdateService() {
-        super(TAG);
+        super(LOG_TAG);
     }
 
     @Override
@@ -62,13 +64,13 @@ public class UpdateService extends IntentService {
             case TASK_SEND_DURATION:
                 long duration = intent.getLongExtra(EXTRA_DURATION, -1);
                 if (duration < 0) {
-                    Logger.d(TAG, "Invalid duration: " + duration);
+                    Logger.d(LOG_TAG, "Invalid duration: " + duration);
                 } else {
                     sendDuration(duration);
                     break;
                 }
             default:
-                Logger.d(TAG, "Invalid task type: " + taskType);
+                Logger.d(LOG_TAG, "Invalid task type: " + taskType);
         }
     }
 
@@ -108,7 +110,6 @@ public class UpdateService extends IntentService {
         if (friends == null) {
             return;
         }
-        List<FriendData> updatedFriends = new ArrayList<FriendData>();
         Map<Long, FriendData> friendById = new HashMap<Long, FriendData>();
         for (FriendData friend : friends) {
             friendById.put(friend.id, friend);
@@ -128,16 +129,15 @@ public class UpdateService extends IntentService {
                     friend.latitude = user.getDouble("latitude");
                     friend.longitude = user.getDouble("longitude");
                 }
-                updatedFriends.add(friend);
             }
         } catch (JSONException e) {
-            Logger.d(TAG, "updateFriendsCoordinates", e);
+            Logger.d(LOG_TAG, "updateFriendsCoordinates", e);
             return;
         } catch (IOException e) {
-            Logger.d(TAG, "updateFriendsCoordinates", e);
+            Logger.d(LOG_TAG, "updateFriendsCoordinates", e);
             return;
         }
-        DBHelper.save(this, updatedFriends);
+        DBHelper.save(this, friends);
         Intent intent = new Intent(ACTION_DATA_UPDATED);
         sendBroadcast(intent);
     }
@@ -159,15 +159,20 @@ public class UpdateService extends IntentService {
             List<FriendData> friends = new ArrayList<FriendData>();
             JSONArray friendsArray = new JSONArray(friendsInfo);
             for (int i = 0; i < friendsArray.length(); i++) {
-                JSONObject friend = friendsArray.getJSONObject(i);
-                friends.add(new FriendData(Long.parseLong(friend.getString("uid")), friend.getString("name"),
-                        friend.getString("pic_5")));
+                JSONObject friendJson = friendsArray.getJSONObject(i);
+                FriendData friend = new FriendData(Long.parseLong(friendJson.getString("uid")),
+                        friendJson.getString("name"), friendJson.getString("pic_5"));
+                friends.add(friend);
+
+                if (!ImageStorage.imageExists(this, friend.imageUrl)) {
+                    ImageDownloader.downloadImage(this, friend.imageUrl);
+                }
             }
             return friends;
         } catch (IOException e) {
-            Logger.d(TAG, "getUserFriends", e);
+            Logger.d(LOG_TAG, "getUserFriends", e);
         } catch (JSONException e) {
-            Logger.d(TAG, "getUserFriends", e);
+            Logger.d(LOG_TAG, "getUserFriends", e);
         }
         return null;
     }
@@ -181,7 +186,7 @@ public class UpdateService extends IntentService {
         try {
             resJson.put("ids", idsArray);
         } catch (JSONException e) {
-            Logger.d(TAG, "genIdsJson", e);
+            Logger.d(LOG_TAG, "genIdsJson", e);
             return null;
         }
         return resJson;
@@ -202,12 +207,12 @@ public class UpdateService extends IntentService {
         try {
             response = client.execute(request);
         } catch (IOException e) {
-            Logger.d(TAG, "postJson", e);
+            Logger.d(LOG_TAG, "postJson", e);
             return null;
         }
         int status = response.getStatusLine().getStatusCode();
         if (status != HttpStatus.SC_OK) {
-            Logger.d(TAG, "postJson; Http error " + status);
+            Logger.d(LOG_TAG, "postJson; Http error " + status);
             return null;
         }
         return response.getEntity();

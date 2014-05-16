@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import ru.ifmo.findmyfriend.R;
+import ru.ifmo.findmyfriend.utils.BitmapStorage;
 
 /**
  * Created by: avgarder
@@ -51,8 +52,11 @@ public class FriendListAdapter extends BaseAdapter {
         ImageView avatar = (ImageView) view.findViewById(R.id.avatar);
         TextView name = (TextView) view.findViewById(R.id.name);
 
-        avatar.setImageResource(parent.getContext().getResources().getIdentifier("ava" + (position + 1), "drawable", "ru.ifmo.findmyfriend"));
-        name.setText(getItem(position).name);
+        Context context = parent.getContext();
+        FriendData friend = getItem(position);
+
+        avatar.setImageBitmap(BitmapStorage.getInstance().getBitmap(context, friend.imageUrl));
+        name.setText(friend.name);
         return view;
     }
 }

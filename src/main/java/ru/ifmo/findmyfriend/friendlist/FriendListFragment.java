@@ -9,16 +9,23 @@ import ru.ifmo.findmyfriend.DataSetChangeable;
 import ru.ifmo.findmyfriend.MainActivity;
 import ru.ifmo.findmyfriend.R;
 import ru.ifmo.findmyfriend.map.MapFragment;
+import ru.ifmo.findmyfriend.utils.BitmapStorage;
 import ru.ifmo.findmyfriend.utils.DBHelper;
 
-public class FriendListFragment extends ListFragment implements DataSetChangeable {
+public class FriendListFragment extends ListFragment implements DataSetChangeable, BitmapStorage.BitmapLoadListener {
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setListAdapter(new FriendListAdapter(getActivity(), DBHelper.getAllFriends(getActivity())));
+    public void onResume() {
+        super.onResume();
+        BitmapStorage.getInstance().addListener(this);
+        setAdapter();
     }
 
+    @Override
+    public void onPause() {
+        super.onPause();
+        BitmapStorage.getInstance().removeListener(this);
+    }
 
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
@@ -36,5 +43,15 @@ public class FriendListFragment extends ListFragment implements DataSetChangeabl
 
     @Override
     public void notifyDataSetChanged() {
+        setAdapter();
+    }
+
+    @Override
+    public void onBitmapLoaded(String url) {
+        ((FriendListAdapter) getListAdapter()).notifyDataSetChanged();
+    }
+
+    private void setAdapter() {
+        setListAdapter(new FriendListAdapter(getActivity(), DBHelper.getAllFriends(getActivity())));
     }
 }
