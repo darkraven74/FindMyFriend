@@ -43,29 +43,29 @@ public class MapFragment extends Fragment implements DataSetChangeable, BitmapSt
     public static final String BUNDLE_KEY_LONGITUDE = "bundle_key_longitude";
     public static final String BUNDLE_KEY_LATITUDE = "bundle_key_latitude";
 
-    private MapView mMapView;
-    private GoogleMap mMap;
-    private Bundle mBundle;
-    private Map<String, Long> mUserIdFromMarkerId;
-    private Map<Long, Marker> mMarkerFromUserId;
+    private MapView mapView;
+    private GoogleMap map;
+    private Map<String, Long> userIdFromMarkerId;
+    private Map<Long, Marker> markerFromUserId;
+    private Bitmap markerBackground;
+    private LatLng curLocation;
 
-    private LatLng mCurLocation;
-
-    private Handler mHandler = new Handler();
+    private Handler handler = new Handler();
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mBundle = savedInstanceState;
         Location location = Utils.getLastBestLocation(getActivity());
-        mCurLocation = new LatLng(location.getLatitude(), location.getLongitude());
+        curLocation = new LatLng(location.getLatitude(), location.getLongitude());
 
         Bundle args = getArguments();
         if (args != null && args.containsKey(BUNDLE_KEY_LONGITUDE)
                 && args.containsKey(BUNDLE_KEY_LATITUDE)) {
-            mCurLocation = new LatLng(args.getDouble(BUNDLE_KEY_LATITUDE),
+            curLocation = new LatLng(args.getDouble(BUNDLE_KEY_LATITUDE),
                     args.getDouble(BUNDLE_KEY_LONGITUDE));
         }
+
+        markerBackground = BitmapFactory.decodeResource(getResources(), R.drawable.custom_marker);
     }
 
     @Override
@@ -73,10 +73,10 @@ public class MapFragment extends Fragment implements DataSetChangeable, BitmapSt
                              Bundle savedInstanceState) {
         final View inflatedView = inflater.inflate(R.layout.map_fragment, container, false);
         MapsInitializer.initialize(getActivity());
-        mMapView = (MapView) inflatedView.findViewById(R.id.mapView);
-        mMapView.onCreate(mBundle);
+        mapView = (MapView) inflatedView.findViewById(R.id.mapView);
+        mapView.onCreate(savedInstanceState);
 
-        mHandler.postDelayed(new Runnable() {
+        handler.postDelayed(new Runnable() {
             @Override
             public void run() {
                 setUpMapIfNeeded(inflatedView);
@@ -86,69 +86,67 @@ public class MapFragment extends Fragment implements DataSetChangeable, BitmapSt
         return inflatedView;
     }
 
-    private Bitmap getMarkerBitmap(int resourceId) {
+    private Bitmap getMarkerBitmap(Bitmap userImage) {
         Bitmap.Config conf = Bitmap.Config.ARGB_8888;
-        Bitmap bmp = Bitmap.createBitmap(90, 125, conf);
-        Canvas canvas = new Canvas(bmp);
-        Paint color = new Paint();
-        canvas.drawBitmap(BitmapFactory.decodeResource(getResources(),
-                R.drawable.custom_marker), 0, 0, color);
-        canvas.drawBitmap(BitmapFactory.decodeResource(getResources(),
-                resourceId), 10, 10, color);
-        return bmp;
+        Bitmap res = Bitmap.createBitmap(90, 125, conf);
+        Canvas canvas = new Canvas(res);
+        canvas.drawBitmap(markerBackground, 0, 0, null);
+        canvas.drawBitmap(userImage, 10, 10, null);
+        return res;
     }
 
     private void setUpMapIfNeeded(View inflatedView) {
-        if (mMap == null) {
-            mMap = ((MapView) inflatedView.findViewById(R.id.mapView)).getMap();
-            if (mMap != null) {
+        if (map == null) {
+            map = ((MapView) inflatedView.findViewById(R.id.mapView)).getMap();
+            if (map != null) {
                 setUpMap();
             }
         }
     }
 
     private void setUpMap() {
-        mUserIdFromMarkerId = new HashMap<String, Long>();
-        mMarkerFromUserId = new HashMap<Long, Marker>();
+        userIdFromMarkerId = new HashMap<String, Long>();
+        markerFromUserId = new HashMap<Long, Marker>();
         updateMarkers();
-        mMap.setMyLocationEnabled(true);
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mCurLocation, 12));
-        mMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
+        map.setMyLocationEnabled(true);
+        map.moveCamera(CameraUpdateFactory.newLatLngZoom(curLocation, 12));
+        map.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
             @Override
             public void onInfoWindowClick(Marker marker) {
                 Intent browseIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://www.odnoklassniki.ru/profile/"
-                        + mUserIdFromMarkerId.get(marker.getId())));
+                        + userIdFromMarkerId.get(marker.getId())));
                 startActivity(browseIntent);
             }
         });
     }
 
     private void updateMarkers() {
-        List<FriendData> allFriends = DBHelper.getOnlineFriends(getActivity());
-        Set<Marker> outdatedMarkers = new HashSet<Marker>(mMarkerFromUserId.values());
+        List<FriendData> allFriends = DBHelper.getAllFriends(getActivity());
+        Set<Marker> outdatedMarkers = new HashSet<Marker>(markerFromUserId.values());
         for (FriendData friendData : allFriends) {
-            Marker marker = mMarkerFromUserId.get(friendData.id);
-            //TODO: images
-            int resourceId = getActivity().getResources().getIdentifier("marker" + friendData.id,
-                    "drawable", "ru.ifmo.findmyfriend");
+            Bitmap userImage = BitmapStorage.getInstance().getBitmap(getActivity(), friendData.imageUrl);
+            if (userImage == null) {
+                continue;
+            }
+            Marker marker = markerFromUserId.get(friendData.id);
             if (marker != null) {
-                marker.setIcon(BitmapDescriptorFactory.fromBitmap(getMarkerBitmap(resourceId)));
+                marker.setIcon(BitmapDescriptorFactory.fromBitmap(getMarkerBitmap(userImage)));
                 marker.setPosition(new LatLng(friendData.latitude, friendData.longitude));
                 outdatedMarkers.remove(marker);
             } else {
-                marker = mMap.addMarker(new MarkerOptions()
+                marker = map.addMarker(new MarkerOptions()
                         .position(new LatLng(friendData.latitude, friendData.longitude))
-                        .icon(BitmapDescriptorFactory.fromBitmap(getMarkerBitmap(resourceId)))
+                        .icon(BitmapDescriptorFactory.fromBitmap(getMarkerBitmap(userImage)))
                         .title(friendData.name));
                 marker.setAnchor(0.5f, 1);
-                mUserIdFromMarkerId.put(marker.getId(), friendData.id);
-                mMarkerFromUserId.put(friendData.id, marker);
+                userIdFromMarkerId.put(marker.getId(), friendData.id);
+                markerFromUserId.put(friendData.id, marker);
             }
         }
         for (Marker marker : outdatedMarkers) {
             String markerId = marker.getId();
-            mMarkerFromUserId.remove(mUserIdFromMarkerId.get(markerId));
-            mUserIdFromMarkerId.remove(markerId);
+            markerFromUserId.remove(userIdFromMarkerId.get(markerId));
+            userIdFromMarkerId.remove(markerId);
             marker.remove();
         }
     }
@@ -166,20 +164,20 @@ public class MapFragment extends Fragment implements DataSetChangeable, BitmapSt
     @Override
     public void onResume() {
         super.onResume();
-        mMapView.onResume();
+        mapView.onResume();
         BitmapStorage.getInstance().addListener(this);
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        mMapView.onPause();
+        mapView.onPause();
         BitmapStorage.getInstance().removeListener(this);
     }
 
     @Override
     public void onDestroy() {
-        mMapView.onDestroy();
+        mapView.onDestroy();
         super.onDestroy();
     }
 }
