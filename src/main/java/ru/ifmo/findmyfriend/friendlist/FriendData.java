@@ -23,6 +23,10 @@ public class FriendData {
     }
 
     public FriendData(long id, String name, String imageUrl) {
-        this(id, name, -1, -1, imageUrl, false, 0);
+        this(id, name, 0, 0, imageUrl, false, 0);
+    }
+
+    public FriendData(long id, double latitude, double longitude, boolean isAlive, long updateTime) {
+        this(id, null, latitude, longitude, null, isAlive, updateTime);
     }
 }

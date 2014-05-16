@@ -5,14 +5,14 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.ListView;
 
-import ru.ifmo.findmyfriend.DataSetChangeable;
+import ru.ifmo.findmyfriend.FriendsStatusListener;
 import ru.ifmo.findmyfriend.MainActivity;
 import ru.ifmo.findmyfriend.R;
 import ru.ifmo.findmyfriend.map.MapFragment;
 import ru.ifmo.findmyfriend.utils.BitmapStorage;
 import ru.ifmo.findmyfriend.utils.DBHelper;
 
-public class FriendListFragment extends ListFragment implements DataSetChangeable, BitmapStorage.BitmapLoadListener {
+public class FriendListFragment extends ListFragment implements FriendsStatusListener, BitmapStorage.BitmapLoadListener {
 
     @Override
     public void onResume() {
@@ -42,7 +42,7 @@ public class FriendListFragment extends ListFragment implements DataSetChangeabl
     }
 
     @Override
-    public void notifyDataSetChanged() {
+    public void onFriendsStatusUpdated() {
         setAdapter();
     }
 

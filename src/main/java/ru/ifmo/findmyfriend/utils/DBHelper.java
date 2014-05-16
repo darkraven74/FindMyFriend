@@ -52,21 +52,26 @@ public class DBHelper extends SQLiteOpenHelper {
         onCreate(db);
     }
 
-    public static void save(Context context, List<FriendData> friends) {
-        if (friends == null || friends.isEmpty()) {
-            return;
-        }
-        String queryFormat = "INSERT OR REPLACE INTO " + TABLE_FRIENDS + "(" +
-                ID + "," + NAME + "," + LATITUDE + "," + LONGITUDE + "," + IMAGE_URL + "," + IS_ALIVE + "," + UPDATE_TIME +
-                ") VALUES (%d, \"%s\", %f, %f, \"%s\", %d, %d);";
+    public static void saveFriendsInfo(Context context, List<FriendData> friends) {
+        final String queryFormat = "INSERT OR REPLACE INTO " + TABLE_FRIENDS + "(" +
+                ID + "," + NAME + "," + IMAGE_URL + ") VALUES (%d, \"%s\", \"%s\");";
         SQLiteDatabase db = new DBHelper(context).getWritableDatabase();
-//        db.beginTransaction();
         for (FriendData friend : friends) {
-            String query = String.format(queryFormat, friend.id, friend.name, friend.latitude, friend.longitude,
-                    friend.imageUrl, friend.isAlive ? 1 : 0, friend.updateTime);
+            String query = String.format(queryFormat, friend.id, friend.name, friend.imageUrl);
             db.execSQL(query);
         }
-//        db.endTransaction();
+        db.close();
+    }
+
+    public static void saveFriendsStatus(Context context, List<FriendData> friends) {
+        final String queryFormat = "INSERT OR REPLACE INTO " + TABLE_FRIENDS + "(" +
+                ID + "," + LATITUDE + "," + LONGITUDE + IS_ALIVE + "," + UPDATE_TIME +
+                ") VALUES (%d, %f, %f, %d, %d);";
+        SQLiteDatabase db = new DBHelper(context).getWritableDatabase();
+        for (FriendData friend : friends) {
+            String query = String.format(queryFormat, friend.id, friend.latitude, friend.longitude, friend.isAlive ? 1 : 0, friend.updateTime);
+            db.execSQL(query);
+        }
         db.close();
     }
 

@@ -41,7 +41,7 @@ public class MainActivity extends Activity {
     private CharSequence title;
     private String[] menuTitles;
 
-    private DataSetChangeable currentFragment;
+    private Fragment currentFragment;
     private UpdateReceiver updateReceiver = new UpdateReceiver();
 
     @Override
@@ -81,7 +81,7 @@ public class MainActivity extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
-        IntentFilter filter = new IntentFilter(UpdateService.ACTION_DATA_UPDATED);
+        IntentFilter filter = new IntentFilter(UpdateService.ACTION_FRIENDS_STATUS_UPDATED);
         registerReceiver(updateReceiver, filter);
     }
 
@@ -123,8 +123,6 @@ public class MainActivity extends Activity {
     }
 
     private void selectItem(int position) {
-
-        FragmentManager fragmentManager = getFragmentManager();
         switch (position) {
             case 0:
                 switchToFragment(new MapFragment());
@@ -151,7 +149,7 @@ public class MainActivity extends Activity {
     }
 
     public void switchToFragment(Fragment fragment) {
-        currentFragment = (DataSetChangeable) fragment;
+        currentFragment = fragment;
         FragmentManager fragmentManager = getFragmentManager();
         fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
     }
@@ -179,11 +177,13 @@ public class MainActivity extends Activity {
     private class UpdateReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
-            currentFragment.notifyDataSetChanged();
+            if (currentFragment instanceof FriendsStatusListener) {
+                ((FriendsStatusListener) currentFragment).onFriendsStatusUpdated();
+            }
         }
     }
 
-    public static class TempFragment extends Fragment implements DataSetChangeable {
+    public static class TempFragment extends Fragment {
         public static final String ARG_FRAGMENT_NUMBER = "fragment_number";
 
         public TempFragment() {
@@ -200,10 +200,6 @@ public class MainActivity extends Activity {
             ((TextView) rootView.findViewById(R.id.text)).setText(text);
             getActivity().setTitle(text);
             return rootView;
-        }
-
-        @Override
-        public void notifyDataSetChanged() {
         }
     }
 }
