@@ -46,9 +46,6 @@ public class MainActivity extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        Intent intent = new Intent(this, UpdateService.class);
-        intent.putExtra(UpdateService.EXTRA_TASK_ID, UpdateService.TASK_UPDATE_FRIENDS_COORDS);
-        startService(intent);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_activity);
 
