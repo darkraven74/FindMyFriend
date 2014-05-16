@@ -164,7 +164,7 @@ public class UpdateService extends IntentService {
             JSONArray friendsArray = new JSONArray(friendsInfo);
             for (int i = 0; i < friendsArray.length(); i++) {
                 JSONObject friendJson = friendsArray.getJSONObject(i);
-                FriendData friend = new FriendData(Long.parseLong(friendJson.getString("uid")),
+                FriendData friend = FriendData.fromInfo(Long.parseLong(friendJson.getString("uid")),
                         friendJson.getString("name"), friendJson.getString("pic_5"));
                 friends.add(friend);
 
