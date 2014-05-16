@@ -5,7 +5,18 @@
     <string name="drawer_close">Close navigation drawer</string>
     <string name="menu_map">Карта</string>
     <string name="menu_friends">Друзья</string>
-    <string name="menu_settings">Настройки</string>
+    <string name="menu_settings">Мое местоположение</string>
     <string name="menu_about">О программе</string>
     <string name="menu_exit">Выход</string>
+    <string name="sharing_until">Делиться моим местоположением до</string>
+    <string name="not_sharing">Не делиться моим местоположением</string>
+    <string name="share_location">Поделиться моим местоположением</string>
+    <string name="edit_time">Изменить время</string>
+    <string name="half_an_hour">30 минут</string>
+    <string name="one_hour">1 час</string>
+    <string name="two_hours">2 часа</string>
+    <string name="five_hours">5 часов</string>
+    <string name="select_time">Выбрать время...</string>
+    <string name="incorrect_time">Некорректное время</string>
+    <string name="cancel">Отменить</string>
 </resources>
