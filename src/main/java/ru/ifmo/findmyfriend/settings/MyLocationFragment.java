@@ -103,6 +103,7 @@ public class MyLocationFragment extends Fragment implements View.OnClickListener
 
         final DatePicker datePicker = createDatePicker();
         builder.setView(datePicker);
+        builder.setTitle(getString(R.string.date_picker_title));
 
         DialogInterface.OnClickListener listener = new DialogInterface.OnClickListener() {
             @Override
@@ -136,6 +137,7 @@ public class MyLocationFragment extends Fragment implements View.OnClickListener
 
         final TimePicker timePicker = createTimePicker();
         builder.setView(timePicker);
+        builder.setTitle(getString(R.string.time_picker_title));
 
         DialogInterface.OnClickListener listener = new DialogInterface.OnClickListener() {
             @Override
@@ -176,11 +178,6 @@ public class MyLocationFragment extends Fragment implements View.OnClickListener
     private void setSharingTime(long time) {
         prefs.edit().putLong(MainActivity.PREFERENCE_SHARING_END_TIME, time).commit();
         updateState();
-
-        Context context = getActivity();
-        AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-        PendingIntent intent = UpdateService.getSendCoordinatesIntent(context);
-        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, 0, TimeUnit.SECONDS.toMillis(10), intent);
     }
 
     private void updateState() {
