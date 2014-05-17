@@ -160,7 +160,7 @@ public class UpdateService extends IntentService {
             Logger.d(LOG_TAG, "updateFriendsStatus", e);
             return;
         }
-        DBHelper.saveFriendsStatus(this, friends);
+        DBHelper.saveFriends(this, friends);
         sendBroadcast(new Intent(ACTION_DATA_CHANGE));
     }
 

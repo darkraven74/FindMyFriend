@@ -19,6 +19,9 @@ public class ImageStorage {
     }
 
     public static File getImageFile(Context context, String imageUrl) {
+        if (imageUrl == null) {
+            return null;
+        }
         return new File(getStorageDirectory(context), getNameFromUrl(imageUrl));
     }
 

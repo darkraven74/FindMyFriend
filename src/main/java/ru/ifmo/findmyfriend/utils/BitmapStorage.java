@@ -56,6 +56,9 @@ public class BitmapStorage {
     };
 
     public Bitmap getBitmap(Context context, String url) {
+        if (url == null) {
+            return null;
+        }
         Bitmap bitmap = urlToBitmap.get(url);
         if (bitmap != null) {
             return bitmap;
