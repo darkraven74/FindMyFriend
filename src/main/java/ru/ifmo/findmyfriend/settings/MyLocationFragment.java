@@ -1,16 +1,19 @@
 package ru.ifmo.findmyfriend.settings;
 
+import android.app.AlarmManager;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
 import android.app.Fragment;
+import android.app.PendingIntent;
 import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.format.DateFormat;
+import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,6 +28,7 @@ import java.util.concurrent.TimeUnit;
 
 import ru.ifmo.findmyfriend.MainActivity;
 import ru.ifmo.findmyfriend.R;
+import ru.ifmo.findmyfriend.UpdateService;
 
 public class MyLocationFragment extends Fragment implements View.OnClickListener {
     private static final long[] sharingDurations = new long[]{TimeUnit.MINUTES.toMillis(30),
@@ -95,13 +99,68 @@ public class MyLocationFragment extends Fragment implements View.OnClickListener
     }
 
     private void chooseDurationDate() {
-        DialogFragment datePicker = new DatePickerFragment();
-        datePicker.show(getFragmentManager(), "datePicker");
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+
+        final DatePicker datePicker = createDatePicker();
+        builder.setView(datePicker);
+
+        DialogInterface.OnClickListener listener = new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                if (which == DialogInterface.BUTTON_POSITIVE) {
+                    customDuration.set(Calendar.YEAR, datePicker.getYear());
+                    customDuration.set(Calendar.MONTH, datePicker.getMonth());
+                    customDuration.set(Calendar.DAY_OF_MONTH, datePicker.getDayOfMonth());
+                    chooseDurationTime();
+                }
+                dialog.dismiss();
+            }
+        };
+        builder.setNegativeButton(getString(R.string.dialog_negative_button), listener);
+        builder.setPositiveButton(getString(R.string.dialog_positive_button), listener);
+        builder.create().show();
+    }
+
+    private DatePicker createDatePicker() {
+        DatePicker datePicker = new DatePicker(getActivity());
+        datePicker.setCalendarViewShown(false);
+        int year = customDuration.get(Calendar.YEAR);
+        int month = customDuration.get(Calendar.MONTH);
+        int day = customDuration.get(Calendar.DAY_OF_MONTH);
+        datePicker.init(year, month, day, null);
+        return datePicker;
     }
 
     private void chooseDurationTime() {
-        DialogFragment timePicker = new TimePickerFragment();
-        timePicker.show(getFragmentManager(), "timePicker");
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+
+        final TimePicker timePicker = createTimePicker();
+        builder.setView(timePicker);
+
+        DialogInterface.OnClickListener listener = new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                if (which == DialogInterface.BUTTON_POSITIVE) {
+                    customDuration.set(Calendar.HOUR_OF_DAY, timePicker.getCurrentHour());
+                    customDuration.set(Calendar.MINUTE, timePicker.getCurrentMinute());
+                    setCustomDuration();
+                }
+                dialog.dismiss();
+            }
+        };
+        builder.setNegativeButton(getString(R.string.dialog_negative_button), listener);
+        builder.setPositiveButton(getString(R.string.dialog_positive_button), listener);
+        builder.create().show();
+    }
+
+    private TimePicker createTimePicker() {
+        TimePicker timePicker = new TimePicker(getActivity());
+        int hour = customDuration.get(Calendar.HOUR_OF_DAY);
+        int minute = customDuration.get(Calendar.MINUTE);
+        timePicker.setIs24HourView(DateFormat.is24HourFormat(getActivity()));
+        timePicker.setCurrentHour(hour);
+        timePicker.setCurrentMinute(minute);
+        return timePicker;
     }
 
     private void setCustomDuration() {
@@ -117,6 +176,11 @@ public class MyLocationFragment extends Fragment implements View.OnClickListener
     private void setSharingTime(long time) {
         prefs.edit().putLong(MainActivity.PREFERENCE_SHARING_END_TIME, time).commit();
         updateState();
+
+        Context context = getActivity();
+        AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+        PendingIntent intent = UpdateService.getSendCoordinatesIntent(context);
+        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, 0, TimeUnit.SECONDS.toMillis(10), intent);
     }
 
     private void updateState() {
@@ -131,43 +195,6 @@ public class MyLocationFragment extends Fragment implements View.OnClickListener
             String formattedSharingUntil = " "
                     + android.text.format.DateFormat.format("dd-MM-yyyy kk:mm", new java.util.Date(time));
             status.setText(getResources().getString(R.string.sharing_until) + formattedSharingUntil);
-        }
-    }
-
-    public class DatePickerFragment extends DialogFragment implements DatePickerDialog.OnDateSetListener {
-        @Override
-        public Dialog onCreateDialog(Bundle savedInstanceState) {
-            int year = customDuration.get(Calendar.YEAR);
-            int month = customDuration.get(Calendar.MONTH);
-            int day = customDuration.get(Calendar.DAY_OF_MONTH);
-            return new DatePickerDialog(getActivity(), this, year, month, day);
-        }
-
-        @Override
-        public void onDateSet(DatePicker view, int year, int month, int day) {
-            customDuration.set(Calendar.YEAR, year);
-            customDuration.set(Calendar.MONTH, month);
-            customDuration.set(Calendar.DAY_OF_MONTH, day);
-            dismiss();
-            chooseDurationTime();
-        }
-    }
-
-    public class TimePickerFragment extends DialogFragment implements TimePickerDialog.OnTimeSetListener {
-        @Override
-        public Dialog onCreateDialog(Bundle savedInstanceState) {
-            int hour = customDuration.get(Calendar.HOUR_OF_DAY);
-            int minute = customDuration.get(Calendar.MINUTE);
-            return new TimePickerDialog(getActivity(), this, hour, minute,
-                    DateFormat.is24HourFormat(getActivity()));
-        }
-
-        @Override
-        public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-            customDuration.set(Calendar.HOUR_OF_DAY, hourOfDay);
-            customDuration.set(Calendar.MINUTE, minute);
-            dismiss();
-            setCustomDuration();
         }
     }
 }

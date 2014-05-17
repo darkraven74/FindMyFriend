@@ -33,4 +33,6 @@
     </string-array>
     <string name="incorrect_time">Incorrect time</string>
     <string name="cancel">Cancel</string>
+    <string name="dialog_positive_button">OK</string>
+    <string name="dialog_negative_button">@string/cancel</string>
 </resources>
