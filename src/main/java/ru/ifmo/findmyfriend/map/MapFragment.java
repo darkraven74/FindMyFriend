@@ -78,14 +78,7 @@ public class MapFragment extends Fragment implements DataChangeListener, BitmapS
         MapsInitializer.initialize(getActivity());
         mapView = (MapView) inflatedView.findViewById(R.id.mapView);
         mapView.onCreate(savedInstanceState);
-
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                setUpMapIfNeeded(inflatedView);
-            }
-        }, 200);
-
+        setUpMapIfNeeded(inflatedView);
         return inflatedView;
     }
 
