@@ -86,7 +86,6 @@ public class DBHelper extends SQLiteOpenHelper {
     public static List<FriendData> getOnlineFriends(Context context) {
         SQLiteDatabase db = new DBHelper(context).getReadableDatabase();
         String updateTimeLimit = String.valueOf(System.currentTimeMillis() - ALIVE_INTERVAL);
-        updateTimeLimit = "0";
 
         Cursor c = db.query(DBHelper.TABLE_FRIENDS, null, IS_ALIVE + "=1 AND " + UPDATE_TIME + ">= $1",
                 new String[]{updateTimeLimit}, null, null, null);

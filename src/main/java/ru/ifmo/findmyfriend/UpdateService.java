@@ -1,8 +1,13 @@
 package ru.ifmo.findmyfriend;
 
+import android.app.AlarmManager;
 import android.app.IntentService;
+import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.location.Location;
+import android.widget.Toast;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -66,19 +71,33 @@ public class UpdateService extends IntentService {
                 updateFriendsInfo();
                 break;
             case TASK_SEND_DURATION:
-                long duration = intent.getLongExtra(EXTRA_DURATION, -1);
+                long duration = intent.getLongExtra(EXTRA_DURATION, 0);
                 if (duration < 0) {
-                    Logger.d(LOG_TAG, "Invalid duration: " + duration);
-                } else {
-                    sendDuration(duration);
-                    break;
+                    duration = 0;
                 }
+                sendDuration(duration);
+                break;
             default:
                 Logger.d(LOG_TAG, "Invalid task type: " + taskType);
         }
     }
 
+    public static PendingIntent getSendCoordinatesIntent(Context context) {
+        Intent intent = new Intent(context, UpdateService.class);
+        intent.putExtra(EXTRA_TASK_ID, TASK_SEND_OUR_COORDINATES);
+        return PendingIntent.getService(context, 0, intent, 0);
+    }
+
     private void sendOurCoordinates() {
+        SharedPreferences prefs = getSharedPreferences(MainActivity.PREFERENCES_NAME, MODE_MULTI_PROCESS);
+        long endTime = prefs.getLong(MainActivity.PREFERENCE_SHARING_END_TIME, 0);
+        if (endTime < System.currentTimeMillis()) {
+            PendingIntent intent = getSendCoordinatesIntent(this);
+            AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
+            alarmManager.cancel(intent);
+            return;
+        }
+
         Location location = Utils.getLastBestLocation(this);
         JSONObject dataJson = new JSONObject();
         long currentUid = Utils.getCurrentUserId(this);
