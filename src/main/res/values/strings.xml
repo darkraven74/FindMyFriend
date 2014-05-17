@@ -33,4 +33,9 @@
     </string-array>
     <string name="incorrect_time">Incorrect time</string>
     <string name="cancel">Cancel</string>
+    <string name="dialog_positive_button">Set</string>
+    <string name="dialog_negative_button">Cancel</string>
+    <string name="date_picker_title">Set date</string>
+    <string name="time_picker_title">Set time</string>
+
 </resources>

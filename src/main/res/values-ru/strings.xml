@@ -19,4 +19,8 @@
     <string name="select_time">Выбрать время...</string>
     <string name="incorrect_time">Некорректное время</string>
     <string name="cancel">Отменить</string>
+    <string name="dialog_positive_button">Установить</string>
+    <string name="dialog_negative_button">Отмена</string>
+    <string name="date_picker_title">Настройка даты</string>
+    <string name="time_picker_title">Настройка времени</string>
 </resources>
