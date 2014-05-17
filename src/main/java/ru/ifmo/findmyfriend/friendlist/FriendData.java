@@ -22,7 +22,11 @@ public class FriendData {
         this.updateTime = updateTime;
     }
 
-    public FriendData(long id, String name, String imageUrl) {
-        this(id, name, -1, -1, imageUrl, false, 0);
+    public static FriendData fromInfo(long id, String name, String imageUrl) {
+        return new FriendData(id, name, 0, 0, imageUrl, false, 0);
+    }
+
+    public static FriendData fromStatus(long id, double latitude, double longitude, boolean isAlive, long updateTime) {
+        return new FriendData(id, null, latitude, longitude, null, isAlive, updateTime);
     }
 }

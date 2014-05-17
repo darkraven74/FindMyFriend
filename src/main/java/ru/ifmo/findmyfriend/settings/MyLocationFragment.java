@@ -23,11 +23,10 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
-import ru.ifmo.findmyfriend.DataSetChangeable;
 import ru.ifmo.findmyfriend.MainActivity;
 import ru.ifmo.findmyfriend.R;
 
-public class MyLocationFragment extends Fragment implements DataSetChangeable, View.OnClickListener {
+public class MyLocationFragment extends Fragment implements View.OnClickListener {
     private static final long[] sharingDurations = new long[]{TimeUnit.MINUTES.toMillis(30),
             TimeUnit.HOURS.toMillis(1), TimeUnit.HOURS.toMillis(2), TimeUnit.HOURS.toMillis(5)};
 
@@ -170,9 +169,5 @@ public class MyLocationFragment extends Fragment implements DataSetChangeable, V
             dismiss();
             setCustomDuration();
         }
-    }
-
-    @Override
-    public void notifyDataSetChanged() {
     }
 }

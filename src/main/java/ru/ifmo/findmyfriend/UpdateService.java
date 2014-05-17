@@ -34,17 +34,18 @@ import ru.ok.android.sdk.Odnoklassniki;
 public class UpdateService extends IntentService {
     private static final String LOG_TAG = UpdateService.class.getName();
 
-    public static final String ACTION_DATA_UPDATED = "ru.ifmo.findmyfriend.ACTION_DATA_UPDATED";
+    public static final String ACTION_DATA_CHANGE = "ru.ifmo.findmyfriend.ACTION_DATA_CHANGE";
 
     public static final String EXTRA_TASK_ID = "task_id";
     public static final String EXTRA_DURATION = "duration";
 
-    public static final int TASK_SEND_OUR_COORDS = 1;
-    public static final int TASK_UPDATE_FRIENDS_COORDS = 2;
-    public static final int TASK_SEND_DURATION = 3;
+    public static final int TASK_SEND_OUR_COORDINATES = 1;
+    public static final int TASK_UPDATE_FRIENDS_STATUS = 2;
+    public static final int TASK_UPDATE_FRIENDS_INFO = 3;
+    public static final int TASK_SEND_DURATION = 4;
 
-    private static final String URL_GET_FRIENDS_COORDS = "http://192.243.125.239:9031/get/coordinates";
-    private static final String URL_POST_OUR_COORDS = "http://192.243.125.239:9031/post/coordinates";
+    private static final String URL_GET_FRIENDS_COORDINATES = "http://192.243.125.239:9031/get/coordinates";
+    private static final String URL_POST_OUR_COORDINATES = "http://192.243.125.239:9031/post/coordinates";
     private static final String URL_POST_DURATION = "http://192.243.125.239:9031/post/duration";
 
     public UpdateService() {
@@ -55,11 +56,14 @@ public class UpdateService extends IntentService {
     protected void onHandleIntent(Intent intent) {
         int taskType = intent.getIntExtra(EXTRA_TASK_ID, -1);
         switch (taskType) {
-            case TASK_SEND_OUR_COORDS:
+            case TASK_SEND_OUR_COORDINATES:
                 sendOurCoordinates();
                 break;
-            case TASK_UPDATE_FRIENDS_COORDS:
-                updateFriendsCoordinates();
+            case TASK_UPDATE_FRIENDS_STATUS:
+                updateFriendsStatus();
+                break;
+            case TASK_UPDATE_FRIENDS_INFO:
+                updateFriendsInfo();
                 break;
             case TASK_SEND_DURATION:
                 long duration = intent.getLongExtra(EXTRA_DURATION, -1);
@@ -87,7 +91,7 @@ public class UpdateService extends IntentService {
             dataJson.put("longitude", location.getLongitude());
         } catch (JSONException ignored) {
         }
-        postJson(URL_POST_OUR_COORDS, dataJson);
+        postJson(URL_POST_OUR_COORDINATES, dataJson);
     }
 
     private void sendDuration(long duration) {
@@ -104,10 +108,10 @@ public class UpdateService extends IntentService {
         postJson(URL_POST_DURATION, dataJson);
     }
 
-    private void updateFriendsCoordinates() {
+    private void updateFriendsStatus() {
         long currentTime = System.currentTimeMillis();
-        List<FriendData> friends = getUserFriends();
-        if (friends == null) {
+        List<FriendData> friends = DBHelper.getAllFriends(this);
+        if (friends == null || friends.isEmpty()) {
             return;
         }
         Map<Long, FriendData> friendById = new HashMap<Long, FriendData>();
@@ -115,7 +119,7 @@ public class UpdateService extends IntentService {
             friendById.put(friend.id, friend);
         }
         JSONObject idsJson = genIdsJson(friends);
-        HttpEntity entity = postJson(URL_GET_FRIENDS_COORDS, idsJson);
+        HttpEntity entity = postJson(URL_GET_FRIENDS_COORDINATES, idsJson);
         try {
             JSONObject resJson = new JSONObject(EntityUtils.toString(entity));
             JSONArray result = resJson.getJSONArray("users");
@@ -131,18 +135,17 @@ public class UpdateService extends IntentService {
                 }
             }
         } catch (JSONException e) {
-            Logger.d(LOG_TAG, "updateFriendsCoordinates", e);
+            Logger.d(LOG_TAG, "updateFriendsStatus", e);
             return;
         } catch (IOException e) {
-            Logger.d(LOG_TAG, "updateFriendsCoordinates", e);
+            Logger.d(LOG_TAG, "updateFriendsStatus", e);
             return;
         }
-        DBHelper.save(this, friends);
-        Intent intent = new Intent(ACTION_DATA_UPDATED);
-        sendBroadcast(intent);
+        DBHelper.saveFriendsStatus(this, friends);
+        sendBroadcast(new Intent(ACTION_DATA_CHANGE));
     }
 
-    private List<FriendData> getUserFriends() {
+    private void updateFriendsInfo() {
         Odnoklassniki ok = Odnoklassniki.getInstance(this);
         try {
             JSONArray friendsIdsArray = new JSONArray(ok.request("friends.get", null, "get"));
@@ -160,7 +163,7 @@ public class UpdateService extends IntentService {
             JSONArray friendsArray = new JSONArray(friendsInfo);
             for (int i = 0; i < friendsArray.length(); i++) {
                 JSONObject friendJson = friendsArray.getJSONObject(i);
-                FriendData friend = new FriendData(Long.parseLong(friendJson.getString("uid")),
+                FriendData friend = FriendData.fromInfo(Long.parseLong(friendJson.getString("uid")),
                         friendJson.getString("name"), friendJson.getString("pic_5"));
                 friends.add(friend);
 
@@ -168,13 +171,13 @@ public class UpdateService extends IntentService {
                     ImageDownloader.downloadImage(this, friend.imageUrl);
                 }
             }
-            return friends;
+            DBHelper.saveFriendsInfo(this, friends);
+            sendBroadcast(new Intent(ACTION_DATA_CHANGE));
         } catch (IOException e) {
-            Logger.d(LOG_TAG, "getUserFriends", e);
+            Logger.d(LOG_TAG, "updateFriendsInfo", e);
         } catch (JSONException e) {
-            Logger.d(LOG_TAG, "getUserFriends", e);
+            Logger.d(LOG_TAG, "updateFriendsInfo", e);
         }
-        return null;
     }
 
     private JSONObject genIdsJson(List<FriendData> friends) {

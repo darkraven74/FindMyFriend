@@ -28,7 +28,6 @@ public class LoginActivity extends Activity implements OkTokenRequestListener {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.login_activity);
         mOdnoklassniki = Odnoklassniki.createInstance(getApplicationContext(), APP_ID, APP_SECRET_KEY, APP_PUBLIC_KEY);
         mOdnoklassniki.setTokenRequestListener(this);
         mOdnoklassniki.requestAuthorization(this, false, OkScope.VALUABLE_ACCESS);
@@ -49,6 +48,11 @@ public class LoginActivity extends Activity implements OkTokenRequestListener {
                             .putString(MainActivity.PREFERENCE_CURRENT_NAME, info.getString("name"))
                             .putString(MainActivity.PREFERENCE_CURRENT_IMG_URL, info.getString("pic_5"))
                             .commit();
+
+                    Intent serviceIntent = new Intent(LoginActivity.this, UpdateService.class);
+                    serviceIntent.putExtra(UpdateService.EXTRA_TASK_ID, UpdateService.TASK_UPDATE_FRIENDS_INFO);
+                    startService(serviceIntent);
+
                     startActivity(new Intent(LoginActivity.this, MainActivity.class));
                 } catch (IOException e) {
                     e.printStackTrace();
