@@ -10,8 +10,11 @@ import android.app.PendingIntent;
 import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.SystemClock;
 import android.text.format.DateFormat;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
@@ -39,6 +42,7 @@ public class MyLocationFragment extends Fragment implements View.OnClickListener
     private TextView share;
     private SharedPreferences prefs;
 
+    private Handler handler = new Handler();
     private final Calendar customDuration = Calendar.getInstance();
 
     @Override
@@ -60,8 +64,18 @@ public class MyLocationFragment extends Fragment implements View.OnClickListener
         cancel.setOnClickListener(this);
 
         prefs = getActivity().getSharedPreferences(MainActivity.PREFERENCES_NAME, Context.MODE_MULTI_PROCESS);
+    }
 
+    @Override
+    public void onResume() {
+        super.onResume();
         updateState();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        handler.removeCallbacksAndMessages(null);
     }
 
     @Override
@@ -178,15 +192,32 @@ public class MyLocationFragment extends Fragment implements View.OnClickListener
     private void setSharingTime(long time) {
         prefs.edit().putLong(MainActivity.PREFERENCE_SHARING_END_TIME, time).commit();
         updateState();
+
+        Context context = getActivity();
+        Intent intent = new Intent(context, UpdateService.class);
+        intent.putExtra(UpdateService.EXTRA_TASK_ID, UpdateService.TASK_SEND_DURATION);
+        intent.putExtra(UpdateService.EXTRA_DURATION, time - System.currentTimeMillis());
+        context.startService(intent);
+
+        AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+        PendingIntent operation = UpdateService.getSendCoordinatesIntent(context);
+        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, 0, TimeUnit.MINUTES.toMillis(1), operation);
     }
 
     private void updateState() {
         long time = prefs.getLong(MainActivity.PREFERENCE_SHARING_END_TIME, 0);
-        if (System.currentTimeMillis() > time) {
+        long currentTime = System.currentTimeMillis();
+        if (currentTime >= time) {
             status.setText(R.string.not_sharing);
             cancel.setVisibility(View.GONE);
             share.setText(getString(R.string.share_location));
         } else {
+            handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    updateState();
+                }
+            }, time - currentTime);
             cancel.setVisibility(View.VISIBLE);
             share.setText(getString(R.string.edit_time));
             String formattedSharingUntil = " "
