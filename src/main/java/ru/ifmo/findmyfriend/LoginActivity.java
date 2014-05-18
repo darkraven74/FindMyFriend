@@ -1,6 +1,7 @@
 package ru.ifmo.findmyfriend;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -14,6 +15,8 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import ru.ifmo.findmyfriend.utils.ImageDownloader;
+import ru.ifmo.findmyfriend.utils.ImageStorage;
 import ru.ok.android.sdk.Odnoklassniki;
 import ru.ok.android.sdk.OkTokenRequestListener;
 import ru.ok.android.sdk.util.OkScope;
@@ -40,20 +43,26 @@ public class LoginActivity extends Activity implements OkTokenRequestListener {
             public void run() {
                 Map<String, String> requestParams = new HashMap<String, String>();
                 requestParams.put("fields", "uid, name, pic_5");
+
+                Context context = LoginActivity.this;
                 try {
                     JSONObject info = new JSONObject(mOdnoklassniki.request("users.getCurrentUser", requestParams, "get"));
-                    SharedPreferences preferences = LoginActivity.this.getSharedPreferences(MainActivity.PREFERENCES_NAME, MODE_MULTI_PROCESS);
+                    SharedPreferences preferences = context.getSharedPreferences(MainActivity.PREFERENCES_NAME, MODE_MULTI_PROCESS);
                     preferences.edit()
                             .putLong(MainActivity.PREFERENCE_CURRENT_UID, Long.parseLong(info.getString("uid")))
                             .putString(MainActivity.PREFERENCE_CURRENT_NAME, info.getString("name"))
                             .putString(MainActivity.PREFERENCE_CURRENT_IMG_URL, info.getString("pic_5"))
                             .commit();
+                    String imageUrl = info.getString("pic_5");
+                    if (!ImageStorage.imageExists(context, imageUrl)) {
+                        ImageDownloader.downloadImage(context, imageUrl);
+                    }
 
-                    Intent serviceIntent = new Intent(LoginActivity.this, UpdateService.class);
+                    Intent serviceIntent = new Intent(context, UpdateService.class);
                     serviceIntent.putExtra(UpdateService.EXTRA_TASK_ID, UpdateService.TASK_UPDATE_FRIENDS_INFO);
                     startService(serviceIntent);
 
-                    startActivity(new Intent(LoginActivity.this, MainActivity.class));
+                    startActivity(new Intent(context, MainActivity.class));
                 } catch (IOException e) {
                     e.printStackTrace();
                 } catch (JSONException e) {
