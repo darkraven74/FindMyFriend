@@ -2,7 +2,6 @@ package ru.ifmo.findmyfriend.drawer;
 
 
 import android.content.Context;
-import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,7 +17,6 @@ import ru.ifmo.findmyfriend.R;
 import ru.ifmo.findmyfriend.utils.BitmapStorage;
 
 public class DrawerListAdapter extends BaseAdapter {
-    private static int[] scaledSizes = new int[]{48, 32, 48, 64, 96};
     private List<DrawerItem> mData;
     private LayoutInflater mInflater;
 
@@ -56,13 +54,10 @@ public class DrawerListAdapter extends BaseAdapter {
         title.setText(mData.get(position).getTitle());
 
         if (position == 0) {
-            int screenLayout = parent.getResources().getConfiguration().screenLayout
-                    & Configuration.SCREENLAYOUT_SIZE_MASK;
-            int scaledSize = scaledSizes[screenLayout];
             Bitmap avatar = BitmapStorage.getInstance().getBitmap(parent.getContext(),
                     mData.get(position).getUrl());
             if (avatar != null) {
-                icon.setImageBitmap(Bitmap.createScaledBitmap(avatar, scaledSize, scaledSize, false));
+                icon.setImageBitmap(avatar);
             }
         }
         return view;
