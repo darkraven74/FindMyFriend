@@ -37,5 +37,7 @@
     <string name="dialog_negative_button">Cancel</string>
     <string name="date_picker_title">Set date</string>
     <string name="time_picker_title">Set time</string>
+    <string name="friends_online">Online</string>
+    <string name="friends_offline">Offline</string>
 
 </resources>

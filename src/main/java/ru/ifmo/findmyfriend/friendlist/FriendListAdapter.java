@@ -84,6 +84,27 @@ public class FriendListAdapter extends BaseAdapter {
             view.setClickable(true);
             name.setTextColor(Color.rgb(0xAA, 0xAA, 0xAA));
         }
+
+        TextView status = (TextView) view.findViewById(R.id.status);
+        ImageView divider = (ImageView) view.findViewById(R.id.divider);
+
+        if (position == 0) {
+            status.setVisibility(View.VISIBLE);
+            divider.setVisibility(View.VISIBLE);
+            if (friend.isAlive) {
+                status.setText(context.getString(R.string.friends_online));
+            } else {
+                status.setText(context.getString(R.string.friends_offline));
+            }
+        } else if (!friend.isAlive && getItem(position - 1).isAlive) {
+            status.setVisibility(View.VISIBLE);
+            divider.setVisibility(View.VISIBLE);
+            status.setText(context.getString(R.string.friends_offline));
+        } else {
+            status.setVisibility(View.GONE);
+            divider.setVisibility(View.GONE);
+        }
+
         return view;
     }
 }
