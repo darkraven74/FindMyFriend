@@ -27,10 +27,9 @@ public class LoginActivity extends Activity implements OkTokenRequestListener {
     private String APP_SECRET_KEY = "BA4A8EBC7AF0F03551156B44";
     private Odnoklassniki mOdnoklassniki;
 
-
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    protected void onResume() {
+        super.onResume();
         mOdnoklassniki = Odnoklassniki.createInstance(getApplicationContext(), APP_ID, APP_SECRET_KEY, APP_PUBLIC_KEY);
         mOdnoklassniki.setTokenRequestListener(this);
         mOdnoklassniki.requestAuthorization(this, false, OkScope.VALUABLE_ACCESS);
