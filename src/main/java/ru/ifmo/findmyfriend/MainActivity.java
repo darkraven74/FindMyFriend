@@ -12,6 +12,7 @@ import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -26,6 +27,7 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import ru.ifmo.findmyfriend.drawer.DrawerItem;
 import ru.ifmo.findmyfriend.drawer.DrawerListAdapter;
@@ -57,6 +59,8 @@ public class MainActivity extends Activity implements BitmapStorage.BitmapLoadLi
 
     private Fragment currentFragment;
     private UpdateReceiver updateReceiver = new UpdateReceiver();
+    private Handler handler = new Handler();
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -111,6 +115,16 @@ public class MainActivity extends Activity implements BitmapStorage.BitmapLoadLi
         registerReceiver(updateReceiver, filter);
         BitmapStorage.getInstance().addListener(this);
 
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                Intent intent = new Intent(MainActivity.this, UpdateService.class);
+                intent.putExtra(UpdateService.EXTRA_TASK_ID, UpdateService.TASK_UPDATE_FRIENDS_STATUS);
+                startService(intent);
+                handler.postDelayed(this, TimeUnit.SECONDS.toMillis(30));
+            }
+        });
+
     }
 
     @Override
@@ -118,6 +132,7 @@ public class MainActivity extends Activity implements BitmapStorage.BitmapLoadLi
         super.onPause();
         unregisterReceiver(updateReceiver);
         BitmapStorage.getInstance().removeListener(this);
+        handler.removeCallbacksAndMessages(null);
     }
 
     @Override
