@@ -17,22 +17,22 @@ import ru.ifmo.findmyfriend.R;
 import ru.ifmo.findmyfriend.utils.BitmapStorage;
 
 public class DrawerListAdapter extends BaseAdapter {
-    private List<DrawerItem> mData;
-    private LayoutInflater mInflater;
+    private List<DrawerItem> data;
+    private LayoutInflater inflater;
 
     public DrawerListAdapter(Context context, List<DrawerItem> data) {
-        mData = new ArrayList<DrawerItem>(data);
-        mInflater = LayoutInflater.from(context);
+        this.data = new ArrayList<DrawerItem>(data);
+        inflater = LayoutInflater.from(context);
     }
 
     @Override
     public int getCount() {
-        return mData.size();
+        return data.size();
     }
 
     @Override
     public DrawerItem getItem(int position) {
-        return mData.get(position);
+        return data.get(position);
     }
 
     @Override
@@ -44,18 +44,18 @@ public class DrawerListAdapter extends BaseAdapter {
     public View getView(int position, View convertView, ViewGroup parent) {
         View view = convertView;
         if (view == null) {
-            view = mInflater.inflate(R.layout.drawer_list_item, null);
+            view = inflater.inflate(R.layout.drawer_list_item, null);
         }
 
         ImageView icon = (ImageView) view.findViewById(R.id.icon);
         TextView title = (TextView) view.findViewById(R.id.title);
 
-        icon.setImageResource(mData.get(position).getIconResource());
-        title.setText(mData.get(position).getTitle());
+        icon.setImageResource(data.get(position).getIconResource());
+        title.setText(data.get(position).getTitle());
 
         if (position == 0) {
             Bitmap avatar = BitmapStorage.getInstance().getBitmap(parent.getContext(),
-                    mData.get(position).getUrl());
+                    data.get(position).getUrl());
             if (avatar != null) {
                 icon.setImageBitmap(avatar);
             }
