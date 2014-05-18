@@ -1,16 +1,13 @@
 package ru.ifmo.findmyfriend.map;
 
 import android.app.Fragment;
-import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
-import android.graphics.Paint;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -29,11 +26,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 
 import ru.ifmo.findmyfriend.DataChangeListener;
 import ru.ifmo.findmyfriend.R;
-import ru.ifmo.findmyfriend.UpdateService;
 import ru.ifmo.findmyfriend.friendlist.FriendData;
 import ru.ifmo.findmyfriend.utils.BitmapStorage;
 import ru.ifmo.findmyfriend.utils.DBHelper;
@@ -53,7 +48,6 @@ public class MapFragment extends Fragment implements DataChangeListener, BitmapS
     private Bitmap markerBackground;
     private LatLng curLocation;
 
-    private Handler handler = new Handler();
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -162,16 +156,6 @@ public class MapFragment extends Fragment implements DataChangeListener, BitmapS
         super.onResume();
         mapView.onResume();
         BitmapStorage.getInstance().addListener(this);
-        handler.post(new Runnable() {
-            @Override
-            public void run() {
-                Context context = getActivity();
-                Intent intent = new Intent(context, UpdateService.class);
-                intent.putExtra(UpdateService.EXTRA_TASK_ID, UpdateService.TASK_UPDATE_FRIENDS_STATUS);
-                context.startService(intent);
-                handler.postDelayed(this, TimeUnit.SECONDS.toMillis(30));
-            }
-        });
     }
 
     @Override
@@ -179,7 +163,6 @@ public class MapFragment extends Fragment implements DataChangeListener, BitmapS
         super.onPause();
         mapView.onPause();
         BitmapStorage.getInstance().removeListener(this);
-        handler.removeCallbacksAndMessages(null);
     }
 
     @Override
