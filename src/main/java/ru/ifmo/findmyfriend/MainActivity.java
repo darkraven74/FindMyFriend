@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -21,6 +22,8 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
+
+import java.util.concurrent.TimeUnit;
 
 import ru.ifmo.findmyfriend.friendlist.FriendListFragment;
 import ru.ifmo.findmyfriend.map.MapFragment;
@@ -43,6 +46,8 @@ public class MainActivity extends Activity {
 
     private Fragment currentFragment;
     private UpdateReceiver updateReceiver = new UpdateReceiver();
+    private Handler handler = new Handler();
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,12 +88,23 @@ public class MainActivity extends Activity {
         super.onResume();
         IntentFilter filter = new IntentFilter(UpdateService.ACTION_DATA_CHANGE);
         registerReceiver(updateReceiver, filter);
+
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                Intent intent = new Intent(MainActivity.this, UpdateService.class);
+                intent.putExtra(UpdateService.EXTRA_TASK_ID, UpdateService.TASK_UPDATE_FRIENDS_STATUS);
+                startService(intent);
+                handler.postDelayed(this, TimeUnit.SECONDS.toMillis(30));
+            }
+        });
     }
 
     @Override
     protected void onPause() {
         super.onPause();
         unregisterReceiver(updateReceiver);
+        handler.removeCallbacksAndMessages(null);
     }
 
     @Override
