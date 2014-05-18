@@ -18,6 +18,7 @@ public class FriendListFragment extends ListFragment implements DataChangeListen
     public void onResume() {
         super.onResume();
         BitmapStorage.getInstance().addListener(this);
+        getActivity().setTitle(getResources().getString(R.string.menu_friends));
         setAdapter();
     }
 

@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
-import android.graphics.Paint;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
@@ -78,6 +77,7 @@ public class MapFragment extends Fragment implements DataChangeListener, BitmapS
         MapsInitializer.initialize(getActivity());
         mapView = (MapView) inflatedView.findViewById(R.id.mapView);
         mapView.onCreate(savedInstanceState);
+        getActivity().setTitle(getResources().getString(R.string.menu_map));
         setUpMapIfNeeded(inflatedView);
         return inflatedView;
     }
@@ -87,7 +87,9 @@ public class MapFragment extends Fragment implements DataChangeListener, BitmapS
         Bitmap res = Bitmap.createBitmap(90, 125, conf);
         Canvas canvas = new Canvas(res);
         canvas.drawBitmap(markerBackground, 0, 0, null);
-        canvas.drawBitmap(userImage, 10, 10, null);
+        if (userImage != null) {
+            canvas.drawBitmap(Bitmap.createScaledBitmap(userImage, 70, 65, false), 10, 10, null);
+        }
         return res;
     }
 
