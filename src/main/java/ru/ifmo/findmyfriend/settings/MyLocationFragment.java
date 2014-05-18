@@ -193,9 +193,7 @@ public class MyLocationFragment extends Fragment implements View.OnClickListener
         intent.putExtra(UpdateService.EXTRA_DURATION, time - System.currentTimeMillis());
         context.startService(intent);
 
-        AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-        PendingIntent operation = UpdateService.getSendCoordinatesIntent(context);
-        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, 0, TimeUnit.MINUTES.toMillis(1), operation);
+        UpdateService.scheduleSendOurCoordinates(context);
     }
 
     private void updateState() {

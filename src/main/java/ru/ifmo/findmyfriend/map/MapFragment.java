@@ -69,7 +69,9 @@ public class MapFragment extends Fragment implements DataChangeListener, BitmapS
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Location location = Utils.getLastBestLocation(getActivity());
-        curLocation = new LatLng(location.getLatitude(), location.getLongitude());
+        if (location != null) {
+            curLocation = new LatLng(location.getLatitude(), location.getLongitude());
+        }
 
         Bundle args = getArguments();
         if (args != null && args.containsKey(BUNDLE_KEY_LONGITUDE)
@@ -125,7 +127,9 @@ public class MapFragment extends Fragment implements DataChangeListener, BitmapS
         markerFromUserId = new HashMap<Long, Marker>();
         updateMarkers();
         map.setMyLocationEnabled(true);
-        map.moveCamera(CameraUpdateFactory.newLatLngZoom(curLocation, 12));
+        if (curLocation != null) {
+            map.moveCamera(CameraUpdateFactory.newLatLngZoom(curLocation, 12));
+        }
         map.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
             @Override
             public void onInfoWindowClick(Marker marker) {
