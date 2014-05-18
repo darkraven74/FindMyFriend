@@ -8,6 +8,7 @@ import android.graphics.Canvas;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -41,13 +42,28 @@ public class MapFragment extends Fragment implements DataChangeListener, BitmapS
     public static final String BUNDLE_KEY_LONGITUDE = "bundle_key_longitude";
     public static final String BUNDLE_KEY_LATITUDE = "bundle_key_latitude";
 
+    private static final int MARKER_WIDTH_DP = 56;
+    private static final int MARKER_HEIGHT_DP = 78;
+    private static final int USER_IMAGE_WIDTH_DP = 44;
+    private static final int USER_IMAGE_HEIGHT_DP = 40;
+    private static final int MARKER_BORDER_WIDTH_DP = 6;
+    private static final int MARKER_BORDER_HEIGHT_DP = 6;
+
+    private int markerWidthPx;
+    private int markerHeightPx;
+    private int userImageWidthPx;
+    private int userImageHeightPx;
+    private int markerBorderWidthPx;
+    private int markerBorderHeightPx;
+
+
     private MapView mapView;
     private GoogleMap map;
     private Map<String, Long> userIdFromMarkerId;
     private Map<Long, Marker> markerFromUserId;
     private Bitmap markerBackground;
     private LatLng curLocation;
-
+    private DisplayMetrics displayMetrics;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -62,7 +78,16 @@ public class MapFragment extends Fragment implements DataChangeListener, BitmapS
                     args.getDouble(BUNDLE_KEY_LONGITUDE));
         }
 
-        markerBackground = BitmapFactory.decodeResource(getResources(), R.drawable.custom_marker);
+        displayMetrics = getResources().getDisplayMetrics();
+        markerWidthPx = convertWidth(MARKER_WIDTH_DP);
+        markerHeightPx = convertHeight(MARKER_HEIGHT_DP);
+        userImageWidthPx = convertWidth(USER_IMAGE_WIDTH_DP);
+        userImageHeightPx = convertHeight(USER_IMAGE_HEIGHT_DP);
+        markerBorderWidthPx = convertWidth(MARKER_BORDER_WIDTH_DP);
+        markerBorderHeightPx = convertHeight(MARKER_BORDER_HEIGHT_DP);
+
+        markerBackground = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.custom_marker),
+                markerWidthPx, markerHeightPx, true);
     }
 
     @Override
@@ -78,12 +103,11 @@ public class MapFragment extends Fragment implements DataChangeListener, BitmapS
 
     private Bitmap getMarkerBitmap(Bitmap userImage) {
         Bitmap.Config conf = Bitmap.Config.ARGB_8888;
-        Bitmap res = Bitmap.createBitmap(90, 125, conf);
+        Bitmap res = Bitmap.createBitmap(markerWidthPx, markerHeightPx, conf);
         Canvas canvas = new Canvas(res);
         canvas.drawBitmap(markerBackground, 0, 0, null);
-        if (userImage != null) {
-            canvas.drawBitmap(Bitmap.createScaledBitmap(userImage, 70, 65, false), 10, 10, null);
-        }
+        userImage = Bitmap.createScaledBitmap(userImage, userImageWidthPx, userImageHeightPx, true);
+        canvas.drawBitmap(userImage, markerBorderWidthPx, markerBorderHeightPx, null);
         return res;
     }
 
@@ -141,6 +165,14 @@ public class MapFragment extends Fragment implements DataChangeListener, BitmapS
             userIdFromMarkerId.remove(markerId);
             marker.remove();
         }
+    }
+
+    private int convertWidth(int dp) {
+        return Math.round(dp * (displayMetrics.xdpi / DisplayMetrics.DENSITY_DEFAULT));
+    }
+
+    private int convertHeight(int dp) {
+        return Math.round(dp * (displayMetrics.ydpi / DisplayMetrics.DENSITY_DEFAULT));
     }
 
     @Override
