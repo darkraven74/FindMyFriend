@@ -1,9 +1,7 @@
 package ru.ifmo.findmyfriend.friendlist;
 
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.graphics.Color;
-import android.graphics.drawable.BitmapDrawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,17 +21,17 @@ import ru.ifmo.findmyfriend.utils.BitmapStorage;
  * Created by: avgarder
  */
 public class FriendListAdapter extends BaseAdapter {
-    private List<FriendData> mData;
-    private LayoutInflater mInflater;
+    private List<FriendData> data;
+    private LayoutInflater inflater;
 
     public FriendListAdapter(Context context) {
-        mInflater = LayoutInflater.from(context);
-        mData = Collections.emptyList();
+        inflater = LayoutInflater.from(context);
+        data = Collections.emptyList();
     }
 
     public void setData(List<FriendData> newData) {
-        mData = new ArrayList<FriendData>(newData);
-        Collections.sort(mData, new Comparator<FriendData>() {
+        data = new ArrayList<FriendData>(newData);
+        Collections.sort(data, new Comparator<FriendData>() {
             @Override
             public int compare(FriendData l, FriendData r) {
                 if (l.isAlive && !r.isAlive) {
@@ -48,15 +46,14 @@ public class FriendListAdapter extends BaseAdapter {
         notifyDataSetChanged();
     }
 
-
     @Override
     public int getCount() {
-        return mData.size();
+        return data.size();
     }
 
     @Override
     public FriendData getItem(int position) {
-        return mData.get(position);
+        return data.get(position);
     }
 
     @Override
@@ -68,7 +65,7 @@ public class FriendListAdapter extends BaseAdapter {
     public View getView(int position, View convertView, ViewGroup parent) {
         View view = convertView;
         if (view == null) {
-            view = mInflater.inflate(R.layout.friend_list_item, null);
+            view = inflater.inflate(R.layout.friend_list_item, null);
         }
 
         ImageView avatar = (ImageView) view.findViewById(R.id.avatar);
