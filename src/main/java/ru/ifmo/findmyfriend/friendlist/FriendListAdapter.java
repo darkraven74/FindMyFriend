@@ -26,16 +26,9 @@ public class FriendListAdapter extends BaseAdapter {
     private List<FriendData> mData;
     private LayoutInflater mInflater;
 
-    private BitmapDrawable backgroundOffline;
-
-
     public FriendListAdapter(Context context) {
         mInflater = LayoutInflater.from(context);
         mData = Collections.emptyList();
-
-        Bitmap background = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888);
-        background.setPixel(0, 0, Color.argb(40, 110, 110, 110));
-        backgroundOffline = new BitmapDrawable(context.getResources(), background);
     }
 
     public void setData(List<FriendData> newData) {
@@ -89,10 +82,10 @@ public class FriendListAdapter extends BaseAdapter {
 
         if (friend.isAlive) {
             view.setClickable(false);
-            view.setBackgroundColor(Color.WHITE);
+            name.setTextColor(Color.BLACK);
         } else {
             view.setClickable(true);
-            view.setBackground(backgroundOffline);
+            name.setTextColor(Color.rgb(0xAA, 0xAA, 0xAA));
         }
         return view;
     }
