@@ -1,6 +1,9 @@
 package ru.ifmo.findmyfriend.friendlist;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,6 +12,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import ru.ifmo.findmyfriend.R;
@@ -21,9 +26,33 @@ public class FriendListAdapter extends BaseAdapter {
     private List<FriendData> mData;
     private LayoutInflater mInflater;
 
-    public FriendListAdapter(Context context, List<FriendData> data) {
-        mData = new ArrayList<FriendData>(data);
+    private BitmapDrawable backgroundOffline;
+
+
+    public FriendListAdapter(Context context) {
         mInflater = LayoutInflater.from(context);
+        mData = Collections.emptyList();
+
+        Bitmap background = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888);
+        background.setPixel(0, 0, Color.argb(40, 110, 110, 110));
+        backgroundOffline = new BitmapDrawable(context.getResources(), background);
+    }
+
+    public void setData(List<FriendData> newData) {
+        mData = new ArrayList<FriendData>(newData);
+        Collections.sort(mData, new Comparator<FriendData>() {
+            @Override
+            public int compare(FriendData l, FriendData r) {
+                if (l.isAlive && !r.isAlive) {
+                    return -1;
+                }
+                if (!l.isAlive && r.isAlive) {
+                    return 1;
+                }
+                return l.name.compareTo(r.name);
+            }
+        });
+        notifyDataSetChanged();
     }
 
 
@@ -57,6 +86,14 @@ public class FriendListAdapter extends BaseAdapter {
 
         avatar.setImageBitmap(BitmapStorage.getInstance().getBitmap(context, friend.imageUrl));
         name.setText(friend.name);
+
+        if (friend.isAlive) {
+            view.setClickable(false);
+            view.setBackgroundColor(Color.WHITE);
+        } else {
+            view.setClickable(true);
+            view.setBackground(backgroundOffline);
+        }
         return view;
     }
 }

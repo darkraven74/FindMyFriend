@@ -13,12 +13,20 @@ import ru.ifmo.findmyfriend.utils.BitmapStorage;
 import ru.ifmo.findmyfriend.utils.DBHelper;
 
 public class FriendListFragment extends ListFragment implements DataChangeListener, BitmapStorage.BitmapLoadListener {
+    private FriendListAdapter adapter;
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        adapter = new FriendListAdapter(getActivity());
+        setListAdapter(adapter);
+    }
 
     @Override
     public void onResume() {
         super.onResume();
         BitmapStorage.getInstance().addListener(this);
-        setAdapter();
+        updateAdapter();
     }
 
     @Override
@@ -43,15 +51,15 @@ public class FriendListFragment extends ListFragment implements DataChangeListen
 
     @Override
     public void onDataChange() {
-        setAdapter();
+        updateAdapter();
     }
 
     @Override
     public void onBitmapLoaded(String url) {
-        ((FriendListAdapter) getListAdapter()).notifyDataSetChanged();
+        adapter.notifyDataSetChanged();
     }
 
-    private void setAdapter() {
-        setListAdapter(new FriendListAdapter(getActivity(), DBHelper.getAllFriends(getActivity())));
+    private void updateAdapter() {
+        adapter.setData(DBHelper.getAllFriends(getActivity()));
     }
 }
