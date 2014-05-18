@@ -50,15 +50,13 @@ public class DrawerListAdapter extends BaseAdapter {
         ImageView icon = (ImageView) view.findViewById(R.id.icon);
         TextView title = (TextView) view.findViewById(R.id.title);
 
-        icon.setImageResource(data.get(position).getIconResource());
         title.setText(data.get(position).getTitle());
 
         if (position == 0) {
-            Bitmap avatar = BitmapStorage.getInstance().getBitmap(parent.getContext(),
-                    data.get(position).getUrl());
-            if (avatar != null) {
-                icon.setImageBitmap(avatar);
-            }
+            icon.setImageBitmap(BitmapStorage.getInstance().getBitmap(parent.getContext(),
+                    data.get(position).getUrl()));
+        } else {
+            icon.setImageResource(data.get(position).getIconResource());
         }
         return view;
     }
