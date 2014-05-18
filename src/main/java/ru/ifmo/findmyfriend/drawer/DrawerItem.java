@@ -2,12 +2,12 @@ package ru.ifmo.findmyfriend.drawer;
 
 public class DrawerItem {
     private String title;
-    private int icon;
+    private int iconResource;
     private String url;
 
-    public DrawerItem(String title, int icon) {
+    public DrawerItem(String title, int iconResource) {
         this.title = title;
-        this.icon = icon;
+        this.iconResource = iconResource;
     }
 
     public DrawerItem(String title, String url) {
@@ -19,8 +19,8 @@ public class DrawerItem {
         return title;
     }
 
-    public int getIcon() {
-        return icon;
+    public int getIconResource() {
+        return iconResource;
     }
 
     public String getUrl() {

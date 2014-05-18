@@ -2,21 +2,15 @@ package ru.ifmo.findmyfriend.settings;
 
 import android.app.AlarmManager;
 import android.app.AlertDialog;
-import android.app.DatePickerDialog;
-import android.app.Dialog;
-import android.app.DialogFragment;
 import android.app.Fragment;
 import android.app.PendingIntent;
-import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.SystemClock;
 import android.text.format.DateFormat;
-import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -49,7 +43,6 @@ public class MyLocationFragment extends Fragment implements View.OnClickListener
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.my_location_fragment, container, false);
-        getActivity().setTitle(getResources().getString(R.string.menu_settings));
         return rootView;
     }
 

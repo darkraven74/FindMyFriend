@@ -41,16 +41,19 @@ public class MainActivity extends Activity implements BitmapStorage.BitmapLoadLi
     public static final String PREFERENCE_CURRENT_NAME = "current_name";
     public static final String PREFERENCE_CURRENT_IMG_URL = "current_pic";
 
+    private static final String SAVED_DRAWER_SELECTED_POSITION = "drawer_selected_position";
+
+    private int drawerSelectedPosition;
+
     private DrawerLayout drawerLayout;
     private ListView drawerList;
     private DrawerListAdapter drawerListAdapter;
     private ActionBarDrawerToggle drawerToggle;
 
-    private CharSequence title;
     private String[] menuTitles;
     private TypedArray menuIcons;
 
-    private Long userId;
+    private long userId;
 
     private Fragment currentFragment;
     private UpdateReceiver updateReceiver = new UpdateReceiver();
@@ -60,7 +63,6 @@ public class MainActivity extends Activity implements BitmapStorage.BitmapLoadLi
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_activity);
 
-        title = getTitle();
         menuTitles = getResources().getStringArray(R.array.drawer_array);
         menuIcons = getResources().obtainTypedArray(R.array.drawer_icons);
         drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -77,7 +79,7 @@ public class MainActivity extends Activity implements BitmapStorage.BitmapLoadLi
         }
 
         drawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
-        drawerListAdapter = new DrawerListAdapter(getApplicationContext(), drawerItems);
+        drawerListAdapter = new DrawerListAdapter(this, drawerItems);
         drawerList.setAdapter(drawerListAdapter);
         drawerList.setOnItemClickListener(new DrawerItemClickListener());
 
@@ -97,6 +99,8 @@ public class MainActivity extends Activity implements BitmapStorage.BitmapLoadLi
 
         if (savedInstanceState == null) {
             selectItem(1);
+        } else {
+            selectItem(savedInstanceState.getInt(SAVED_DRAWER_SELECTED_POSITION, 1));
         }
     }
 
@@ -120,6 +124,12 @@ public class MainActivity extends Activity implements BitmapStorage.BitmapLoadLi
     protected void onDestroy() {
         super.onDestroy();
         BitmapStorage.getInstance().clearAll(this);
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt(SAVED_DRAWER_SELECTED_POSITION, drawerSelectedPosition);
     }
 
     @Override
@@ -153,6 +163,7 @@ public class MainActivity extends Activity implements BitmapStorage.BitmapLoadLi
     }
 
     private void selectItem(int position) {
+        drawerSelectedPosition = position;
         switch (position) {
             case 0:
                 Intent browseIntent = new Intent(Intent.ACTION_VIEW,
@@ -178,6 +189,7 @@ public class MainActivity extends Activity implements BitmapStorage.BitmapLoadLi
 
         drawerList.setItemChecked(position, true);
         drawerList.setItemChecked(position, false);
+        setTitle(menuTitles[position]);
 
         drawerLayout.closeDrawer(drawerList);
     }
@@ -190,8 +202,7 @@ public class MainActivity extends Activity implements BitmapStorage.BitmapLoadLi
 
     @Override
     public void setTitle(CharSequence title) {
-        this.title = title;
-        getActionBar().setTitle(this.title);
+        getActionBar().setTitle(title);
     }
 
     @Override
