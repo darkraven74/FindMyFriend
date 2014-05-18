@@ -3,6 +3,7 @@
     <string name="app_name">Найди друга</string>
     <string name="drawer_open">Open navigation drawer</string>
     <string name="drawer_close">Close navigation drawer</string>
+    <string name="menu_name">Имя</string>
     <string name="menu_map">Карта</string>
     <string name="menu_friends">Друзья</string>
     <string name="menu_settings">Мое местоположение</string>

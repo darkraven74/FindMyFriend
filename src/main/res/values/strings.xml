@@ -3,18 +3,28 @@
     <string name="app_name">FindMyFriend</string>
     <string name="drawer_open">Open navigation drawer</string>
     <string name="drawer_close">Close navigation drawer</string>
+    <string name="menu_name">Name</string>
     <string name="menu_map">Map</string>
     <string name="menu_friends">Friends</string>
     <string name="menu_settings">My location</string>
     <string name="menu_about">About</string>
     <string name="menu_exit">Exit</string>
     <string-array name="drawer_array">
+        <item>@string/menu_name</item>
         <item>@string/menu_map</item>
         <item>@string/menu_friends</item>
         <item>@string/menu_settings</item>
         <item>@string/menu_about</item>
         <item>@string/menu_exit</item>
     </string-array>
+    <array name="drawer_icons">
+        <item>@drawable/person</item>
+        <item>@drawable/map</item>
+        <item>@drawable/friends</item>
+        <item>@drawable/location</item>
+        <item>@drawable/about</item>
+        <item>@drawable/exit</item>
+    </array>
     <string name="sharing_until">My location is sharing until</string>
     <string name="not_sharing">My location is not sharing now</string>
     <string name="share_location">Share my location</string>

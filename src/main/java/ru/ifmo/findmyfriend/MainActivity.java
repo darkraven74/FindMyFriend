@@ -7,7 +7,10 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
+import android.content.res.TypedArray;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.ActionBarDrawerToggle;
@@ -19,30 +22,40 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import ru.ifmo.findmyfriend.drawer.DrawerItem;
+import ru.ifmo.findmyfriend.drawer.DrawerListAdapter;
 import ru.ifmo.findmyfriend.friendlist.FriendListFragment;
 import ru.ifmo.findmyfriend.map.MapFragment;
 import ru.ifmo.findmyfriend.settings.MyLocationFragment;
 import ru.ifmo.findmyfriend.utils.BitmapStorage;
 
-public class MainActivity extends Activity {
+public class MainActivity extends Activity implements BitmapStorage.BitmapLoadListener {
     public static final String PREFERENCES_NAME = MainActivity.class.getName();
     public static final String PREFERENCE_SHARING_END_TIME = "sharing_end_time";
     public static final String PREFERENCE_CURRENT_UID = "current_uid";
     public static final String PREFERENCE_CURRENT_NAME = "current_name";
     public static final String PREFERENCE_CURRENT_IMG_URL = "current_pic";
 
+    private static final String SAVED_DRAWER_SELECTED_POSITION = "drawer_selected_position";
+
+    private int drawerSelectedPosition;
+
     private DrawerLayout drawerLayout;
     private ListView drawerList;
+    private DrawerListAdapter drawerListAdapter;
     private ActionBarDrawerToggle drawerToggle;
 
-    private CharSequence title;
     private String[] menuTitles;
+    private TypedArray menuIcons;
+
+    private long userId;
 
     private Fragment currentFragment;
     private UpdateReceiver updateReceiver = new UpdateReceiver();
@@ -54,14 +67,24 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_activity);
 
-        title = getTitle();
         menuTitles = getResources().getStringArray(R.array.drawer_array);
+        menuIcons = getResources().obtainTypedArray(R.array.drawer_icons);
         drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawerList = (ListView) findViewById(R.id.left_drawer);
 
+        SharedPreferences prefs = getSharedPreferences(PREFERENCES_NAME, MODE_MULTI_PROCESS);
+        List<DrawerItem> drawerItems = new ArrayList<DrawerItem>();
+
+        userId = prefs.getLong(PREFERENCE_CURRENT_UID, 0);
+        drawerItems.add(new DrawerItem(prefs.getString(PREFERENCE_CURRENT_NAME, ""),
+                prefs.getString(PREFERENCE_CURRENT_IMG_URL, "")));
+        for (int i = 1; i <= 5; i++) {
+            drawerItems.add(new DrawerItem(menuTitles[i], menuIcons.getResourceId(i, -1)));
+        }
+
         drawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
-        drawerList.setAdapter(new ArrayAdapter<String>(this,
-                R.layout.drawer_list_item, menuTitles));
+        drawerListAdapter = new DrawerListAdapter(this, drawerItems);
+        drawerList.setAdapter(drawerListAdapter);
         drawerList.setOnItemClickListener(new DrawerItemClickListener());
 
         getActionBar().setDisplayHomeAsUpEnabled(true);
@@ -79,7 +102,9 @@ public class MainActivity extends Activity {
         drawerLayout.setDrawerListener(drawerToggle);
 
         if (savedInstanceState == null) {
-            selectItem(0);
+            selectItem(1);
+        } else {
+            selectItem(savedInstanceState.getInt(SAVED_DRAWER_SELECTED_POSITION, 1));
         }
     }
 
@@ -88,6 +113,7 @@ public class MainActivity extends Activity {
         super.onResume();
         IntentFilter filter = new IntentFilter(UpdateService.ACTION_DATA_CHANGE);
         registerReceiver(updateReceiver, filter);
+        BitmapStorage.getInstance().addListener(this);
 
         handler.post(new Runnable() {
             @Override
@@ -98,12 +124,14 @@ public class MainActivity extends Activity {
                 handler.postDelayed(this, TimeUnit.SECONDS.toMillis(30));
             }
         });
+
     }
 
     @Override
     protected void onPause() {
         super.onPause();
         unregisterReceiver(updateReceiver);
+        BitmapStorage.getInstance().removeListener(this);
         handler.removeCallbacksAndMessages(null);
     }
 
@@ -111,6 +139,12 @@ public class MainActivity extends Activity {
     protected void onDestroy() {
         super.onDestroy();
         BitmapStorage.getInstance().clearAll(this);
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt(SAVED_DRAWER_SELECTED_POSITION, drawerSelectedPosition);
     }
 
     @Override
@@ -131,6 +165,11 @@ public class MainActivity extends Activity {
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    public void onBitmapLoaded(String url) {
+        drawerListAdapter.notifyDataSetChanged();
+    }
+
     private class DrawerItemClickListener implements ListView.OnItemClickListener {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -139,14 +178,20 @@ public class MainActivity extends Activity {
     }
 
     private void selectItem(int position) {
+        drawerSelectedPosition = position;
         switch (position) {
             case 0:
-                switchToFragment(new MapFragment());
+                Intent browseIntent = new Intent(Intent.ACTION_VIEW,
+                        Uri.parse("http://www.odnoklassniki.ru/profile/" + userId));
+                startActivity(browseIntent);
                 break;
             case 1:
-                switchToFragment(new FriendListFragment());
+                switchToFragment(new MapFragment());
                 break;
             case 2:
+                switchToFragment(new FriendListFragment());
+                break;
+            case 3:
                 switchToFragment(new MyLocationFragment());
                 break;
             default:
@@ -159,8 +204,8 @@ public class MainActivity extends Activity {
 
         drawerList.setItemChecked(position, true);
         drawerList.setItemChecked(position, false);
-
         setTitle(menuTitles[position]);
+
         drawerLayout.closeDrawer(drawerList);
     }
 
@@ -172,8 +217,7 @@ public class MainActivity extends Activity {
 
     @Override
     public void setTitle(CharSequence title) {
-        this.title = title;
-        getActionBar().setTitle(this.title);
+        getActionBar().setTitle(title);
     }
 
     @Override
