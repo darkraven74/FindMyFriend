@@ -1,9 +1,7 @@
-package ru.ifmo.findmyfriend.settings;
+package ru.ifmo.findmyfriend.mylocation;
 
-import android.app.AlarmManager;
 import android.app.AlertDialog;
 import android.app.Fragment;
-import android.app.PendingIntent;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;

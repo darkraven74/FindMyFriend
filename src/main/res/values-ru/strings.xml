@@ -8,7 +8,6 @@
     <string name="menu_friends">Друзья</string>
     <string name="menu_settings">Мое местоположение</string>
     <string name="menu_about">О программе</string>
-    <string name="menu_exit">Выход</string>
     <string name="sharing_until">Делиться моим местоположением до</string>
     <string name="not_sharing">Не делиться моим местоположением</string>
     <string name="share_location">Поделиться моим местоположением</string>

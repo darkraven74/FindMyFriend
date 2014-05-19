@@ -10,6 +10,8 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -33,7 +35,7 @@ import ru.ifmo.findmyfriend.drawer.DrawerItem;
 import ru.ifmo.findmyfriend.drawer.DrawerListAdapter;
 import ru.ifmo.findmyfriend.friendlist.FriendListFragment;
 import ru.ifmo.findmyfriend.map.MapFragment;
-import ru.ifmo.findmyfriend.settings.MyLocationFragment;
+import ru.ifmo.findmyfriend.mylocation.MyLocationFragment;
 import ru.ifmo.findmyfriend.utils.BitmapStorage;
 
 public class MainActivity extends Activity implements BitmapStorage.BitmapLoadListener {
@@ -78,7 +80,7 @@ public class MainActivity extends Activity implements BitmapStorage.BitmapLoadLi
         userId = prefs.getLong(PREFERENCE_CURRENT_UID, 0);
         drawerItems.add(new DrawerItem(prefs.getString(PREFERENCE_CURRENT_NAME, ""),
                 prefs.getString(PREFERENCE_CURRENT_IMG_URL, "")));
-        for (int i = 1; i <= 5; i++) {
+        for (int i = 1; i <= 4; i++) {
             drawerItems.add(new DrawerItem(menuTitles[i], menuIcons.getResourceId(i, -1)));
         }
 
@@ -89,11 +91,12 @@ public class MainActivity extends Activity implements BitmapStorage.BitmapLoadLi
 
         getActionBar().setDisplayHomeAsUpEnabled(true);
         getActionBar().setHomeButtonEnabled(true);
+        getActionBar().setBackgroundDrawable(new ColorDrawable(Color.parseColor("#FE9711")));
 
         drawerToggle = new ActionBarDrawerToggle(
                 this,                  /* host Activity */
                 drawerLayout,         /* DrawerLayout object */
-                R.drawable.ic_drawer,  /* nav drawer image to replace 'Up' caret */
+                R.drawable.ic_drawer_light,  /* nav drawer image to replace 'Up' caret */
                 R.string.drawer_open,  /* "open drawer" description for accessibility */
                 R.string.drawer_close  /* "close drawer" description for accessibility */
         ) {
@@ -178,13 +181,12 @@ public class MainActivity extends Activity implements BitmapStorage.BitmapLoadLi
     }
 
     private void selectItem(int position) {
-        drawerSelectedPosition = position;
         switch (position) {
             case 0:
                 Intent browseIntent = new Intent(Intent.ACTION_VIEW,
                         Uri.parse("http://www.odnoklassniki.ru/profile/" + userId));
                 startActivity(browseIntent);
-                break;
+                return;
             case 1:
                 switchToFragment(new MapFragment());
                 break;
@@ -201,7 +203,7 @@ public class MainActivity extends Activity implements BitmapStorage.BitmapLoadLi
                 tempFragment.setArguments(args);
                 switchToFragment(tempFragment);
         }
-
+        drawerSelectedPosition = position;
         drawerList.setItemChecked(position, true);
         drawerList.setItemChecked(position, false);
         setTitle(menuTitles[position]);
