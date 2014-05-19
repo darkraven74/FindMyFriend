@@ -40,6 +40,9 @@ public class Utils {
                 }
             }
         }
+        if (bestResult == null) {
+            Logger.d("Location", "Couldn't get current location");
+        }
         return bestResult;
     }
 

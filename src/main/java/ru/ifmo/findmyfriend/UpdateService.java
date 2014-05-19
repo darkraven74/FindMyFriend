@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import ru.ifmo.findmyfriend.friendlist.FriendData;
 import ru.ifmo.findmyfriend.utils.DBHelper;
@@ -82,17 +83,23 @@ public class UpdateService extends IntentService {
         }
     }
 
-    public static PendingIntent getSendCoordinatesIntent(Context context) {
+    private static PendingIntent getSendCoordinatesOperation(Context context) {
         Intent intent = new Intent(context, UpdateService.class);
         intent.putExtra(EXTRA_TASK_ID, TASK_SEND_OUR_COORDINATES);
-        return PendingIntent.getService(context, 0, intent, 0);
+        PendingIntent operation = PendingIntent.getService(context, 0, intent, 0);
+        return operation;
+    }
+
+    public static void scheduleSendOurCoordinates(Context context) {
+        AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, 0, TimeUnit.MINUTES.toMillis(1), getSendCoordinatesOperation(context));
     }
 
     private void sendOurCoordinates() {
         SharedPreferences prefs = getSharedPreferences(MainActivity.PREFERENCES_NAME, MODE_MULTI_PROCESS);
         long endTime = prefs.getLong(MainActivity.PREFERENCE_SHARING_END_TIME, 0);
         if (endTime < System.currentTimeMillis()) {
-            PendingIntent intent = getSendCoordinatesIntent(this);
+            PendingIntent intent = getSendCoordinatesOperation(this);
             AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
             alarmManager.cancel(intent);
             return;
