@@ -15,6 +15,8 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import ru.ifmo.findmyfriend.R;
+
 /**
 * Created by: avgarder
 */
@@ -31,9 +33,16 @@ public class BitmapStorage {
 
     private static BitmapStorage instance = null;
 
+    public static BitmapStorage createInstance(Context context) {
+        if (instance == null) {
+            instance = new BitmapStorage(context);
+        }
+        return instance;
+    }
+
     public static BitmapStorage getInstance() {
         if (instance == null) {
-            instance = new BitmapStorage();
+            throw new IllegalStateException("BitmapStorage is not created yet");
         }
         return instance;
     }
@@ -55,9 +64,18 @@ public class BitmapStorage {
         }
     };
 
+    private Bitmap stubUserImage;
+
+    private BitmapStorage(Context context) {
+        stubUserImage = BitmapFactory.decodeResource(context.getResources(), R.drawable.stub_user_image);
+    }
+
     public Bitmap getBitmap(Context context, String url) {
         if (url == null) {
             return null;
+        }
+        if (url.endsWith("stub_128x128.gif")) {
+            return stubUserImage;
         }
         Bitmap bitmap = urlToBitmap.get(url);
         if (bitmap != null) {

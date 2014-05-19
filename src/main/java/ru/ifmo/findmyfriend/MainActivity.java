@@ -104,6 +104,8 @@ public class MainActivity extends Activity implements BitmapStorage.BitmapLoadLi
         };
         drawerLayout.setDrawerListener(drawerToggle);
 
+        BitmapStorage.createInstance(this);
+
         if (savedInstanceState == null) {
             selectItem(1);
         } else {
