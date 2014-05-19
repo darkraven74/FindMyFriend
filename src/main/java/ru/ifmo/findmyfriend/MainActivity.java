@@ -91,7 +91,7 @@ public class MainActivity extends Activity implements BitmapStorage.BitmapLoadLi
 
         getActionBar().setDisplayHomeAsUpEnabled(true);
         getActionBar().setHomeButtonEnabled(true);
-        getActionBar().setBackgroundDrawable(new ColorDrawable(Color.parseColor("#F5821F")));
+        getActionBar().setBackgroundDrawable(new ColorDrawable(Color.parseColor("#FE9711")));
 
         drawerToggle = new ActionBarDrawerToggle(
                 this,                  /* host Activity */
