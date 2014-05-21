@@ -45,9 +45,12 @@ public class MainActivity extends Activity implements BitmapStorage.BitmapLoadLi
     public static final String PREFERENCE_CURRENT_NAME = "current_name";
     public static final String PREFERENCE_CURRENT_IMG_URL = "current_pic";
 
-    private static final String SAVED_DRAWER_SELECTED_POSITION = "drawer_selected_position";
+    public static final int DRAWER_MAP_POSITION = 1;
+    public static final int DRAWER_FRIEND_LIST_POSITION = 2;
+    public static final int DRAWER_MY_LOCATION_POSITION = 3;
+    public static final int DRAWER_ABOUT_POSITION = 4;
 
-    private int drawerSelectedPosition;
+    private static final String SAVED_DRAWER_SELECTED_POSITION = "drawer_selected_position";
 
     private DrawerLayout drawerLayout;
     private ListView drawerList;
@@ -107,9 +110,9 @@ public class MainActivity extends Activity implements BitmapStorage.BitmapLoadLi
         BitmapStorage.createInstance(this);
 
         if (savedInstanceState == null) {
-            selectItem(1);
+            selectItem(DRAWER_MAP_POSITION);
         } else {
-            selectItem(savedInstanceState.getInt(SAVED_DRAWER_SELECTED_POSITION, 1));
+            selectItem(savedInstanceState.getInt(SAVED_DRAWER_SELECTED_POSITION, DRAWER_MAP_POSITION));
         }
     }
 
@@ -149,7 +152,19 @@ public class MainActivity extends Activity implements BitmapStorage.BitmapLoadLi
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putInt(SAVED_DRAWER_SELECTED_POSITION, drawerSelectedPosition);
+        int currentDrawerPosition;
+        if (currentFragment instanceof MapFragment) {
+            currentDrawerPosition = DRAWER_MAP_POSITION;
+        } else if (currentFragment instanceof FriendListFragment) {
+            currentDrawerPosition = DRAWER_FRIEND_LIST_POSITION;
+        } else if (currentFragment instanceof MyLocationFragment) {
+            currentDrawerPosition = DRAWER_MY_LOCATION_POSITION;
+        } else if (currentFragment instanceof TempFragment) {
+            currentDrawerPosition = DRAWER_ABOUT_POSITION;
+        } else {
+            throw new AssertionError("Invalid currentFragment");
+        }
+        outState.putInt(SAVED_DRAWER_SELECTED_POSITION, currentDrawerPosition);
     }
 
     @Override
@@ -205,7 +220,6 @@ public class MainActivity extends Activity implements BitmapStorage.BitmapLoadLi
                 tempFragment.setArguments(args);
                 switchToFragment(tempFragment);
         }
-        drawerSelectedPosition = position;
         drawerList.setItemChecked(position, true);
         drawerList.setItemChecked(position, false);
         setTitle(menuTitles[position]);
