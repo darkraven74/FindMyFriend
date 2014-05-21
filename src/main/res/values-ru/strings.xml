@@ -26,7 +26,7 @@
     <string name="friends_online">Онлайн</string>
     <string name="friends_offline">Оффлайн</string>
     <string name="version">Версия</string>
-    <string name="developers">Разработчики:</string>
+    <string name="developers">Написать разработчикам:</string>
     <string name="mailto_avgarder"><a href="mailto:avgarder@gmail.com">Антон Гардер</a></string>
     <string name="mailto_darkraven8"><a href="mailto:darkraven8@gmail.com">Владимир Баев</a></string>
 </resources>
