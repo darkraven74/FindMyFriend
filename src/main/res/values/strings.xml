@@ -46,5 +46,8 @@
     <string name="time_picker_title">Set time</string>
     <string name="friends_online">Online</string>
     <string name="friends_offline">Offline</string>
-
+    <string name="version">Version</string>
+    <string name="developers">Developers:</string>
+    <string name="mailto_avgarder"><a href="mailto:avgarder@gmail.com">Anton Garder</a></string>
+    <string name="mailto_darkraven8"><a href="mailto:darkraven8@gmail.com">Vladimir Baev</a></string>
 </resources>

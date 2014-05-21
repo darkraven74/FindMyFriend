@@ -18,19 +18,17 @@ import android.os.Handler;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
-import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import ru.ifmo.findmyfriend.about.AboutFragment;
 import ru.ifmo.findmyfriend.drawer.DrawerItem;
 import ru.ifmo.findmyfriend.drawer.DrawerListAdapter;
 import ru.ifmo.findmyfriend.friendlist.FriendListFragment;
@@ -198,12 +196,9 @@ public class MainActivity extends Activity implements BitmapStorage.BitmapLoadLi
             case 3:
                 switchToFragment(new MyLocationFragment());
                 break;
-            default:
-                Fragment tempFragment = new TempFragment();
-                Bundle args = new Bundle();
-                args.putInt(TempFragment.ARG_FRAGMENT_NUMBER, position);
-                tempFragment.setArguments(args);
-                switchToFragment(tempFragment);
+            case 4:
+                switchToFragment(new AboutFragment());
+                break;
         }
         drawerSelectedPosition = position;
         drawerList.setItemChecked(position, true);
@@ -244,26 +239,6 @@ public class MainActivity extends Activity implements BitmapStorage.BitmapLoadLi
             if (currentFragment instanceof DataChangeListener) {
                 ((DataChangeListener) currentFragment).onDataChange();
             }
-        }
-    }
-
-    public static class TempFragment extends Fragment {
-        public static final String ARG_FRAGMENT_NUMBER = "fragment_number";
-
-        public TempFragment() {
-            // Empty constructor required for fragment subclasses
-        }
-
-        @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                                 Bundle savedInstanceState) {
-
-            int i = getArguments().getInt(ARG_FRAGMENT_NUMBER);
-            View rootView = inflater.inflate(R.layout.test_fragment, container, false);
-            String text = getResources().getStringArray(R.array.drawer_array)[i];
-            ((TextView) rootView.findViewById(R.id.text)).setText(text);
-            getActivity().setTitle(text);
-            return rootView;
         }
     }
 }
