@@ -157,7 +157,7 @@ public class MainActivity extends Activity implements BitmapStorage.BitmapLoadLi
             currentDrawerPosition = DRAWER_FRIEND_LIST_POSITION;
         } else if (currentFragment instanceof MyLocationFragment) {
             currentDrawerPosition = DRAWER_MY_LOCATION_POSITION;
-        } else if (currentFragment instanceof TempFragment) {
+        } else if (currentFragment instanceof AboutFragment) {
             currentDrawerPosition = DRAWER_ABOUT_POSITION;
         } else {
             throw new AssertionError("Invalid currentFragment");
