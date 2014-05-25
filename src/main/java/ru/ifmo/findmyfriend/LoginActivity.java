@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Bundle;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -25,7 +26,7 @@ public class LoginActivity extends Activity implements OkTokenRequestListener {
     private Odnoklassniki mOdnoklassniki;
 
     @Override
-    protected void onResume() {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onResume();
         mOdnoklassniki = Odnoklassniki.createInstance(getApplicationContext(), APP_ID, APP_SECRET_KEY, APP_PUBLIC_KEY);
         mOdnoklassniki.setTokenRequestListener(this);
