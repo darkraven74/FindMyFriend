@@ -42,6 +42,9 @@ public class MapFragment extends Fragment implements DataChangeListener, BitmapS
     public static final String BUNDLE_KEY_LONGITUDE = "bundle_key_longitude";
     public static final String BUNDLE_KEY_LATITUDE = "bundle_key_latitude";
 
+    private static final String SAVED_LATITUDE = "latitude";
+    private static final String SAVED_LONGITUDE = "longitude";
+
     private static final int MARKER_WIDTH_DP = 56;
     private static final int MARKER_HEIGHT_DP = 78;
     private static final int USER_IMAGE_WIDTH_DP = 44;
@@ -68,16 +71,23 @@ public class MapFragment extends Fragment implements DataChangeListener, BitmapS
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Location location = Utils.getLastBestLocation(getActivity());
-        if (location != null) {
-            curLocation = new LatLng(location.getLatitude(), location.getLongitude());
-        }
 
-        Bundle args = getArguments();
-        if (args != null && args.containsKey(BUNDLE_KEY_LONGITUDE)
-                && args.containsKey(BUNDLE_KEY_LATITUDE)) {
-            curLocation = new LatLng(args.getDouble(BUNDLE_KEY_LATITUDE),
-                    args.getDouble(BUNDLE_KEY_LONGITUDE));
+        if (savedInstanceState != null && savedInstanceState.containsKey(SAVED_LONGITUDE) && savedInstanceState.containsKey(SAVED_LATITUDE)) {
+            double latitude = savedInstanceState.getDouble(SAVED_LATITUDE);
+            double longitude = savedInstanceState.getDouble(SAVED_LONGITUDE);
+            curLocation = new LatLng(latitude, longitude);
+        } else {
+            Bundle args = getArguments();
+            if (args != null && args.containsKey(BUNDLE_KEY_LONGITUDE)
+                    && args.containsKey(BUNDLE_KEY_LATITUDE)) {
+                curLocation = new LatLng(args.getDouble(BUNDLE_KEY_LATITUDE),
+                        args.getDouble(BUNDLE_KEY_LONGITUDE));
+            } else {
+                Location location = Utils.getLastBestLocation(getActivity());
+                if (location != null) {
+                    curLocation = new LatLng(location.getLatitude(), location.getLongitude());
+                }
+            }
         }
 
         displayMetrics = getResources().getDisplayMetrics();
@@ -101,6 +111,14 @@ public class MapFragment extends Fragment implements DataChangeListener, BitmapS
         mapView.onCreate(savedInstanceState);
         setUpMapIfNeeded(inflatedView);
         return inflatedView;
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        LatLng cameraPosition = map.getCameraPosition().target;
+        outState.putDouble(SAVED_LATITUDE, cameraPosition.latitude);
+        outState.putDouble(SAVED_LONGITUDE, cameraPosition.longitude);
     }
 
     private Bitmap getMarkerBitmap(Bitmap userImage) {
