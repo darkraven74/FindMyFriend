@@ -48,6 +48,8 @@ public class MainActivity extends Activity implements BitmapStorage.BitmapLoadLi
     public static final int DRAWER_MY_LOCATION_POSITION = 3;
     public static final int DRAWER_ABOUT_POSITION = 4;
 
+    private static final String FRAGMENTS_TAG = "ru.ifmo.findmyfriend.MainActivity.FRAGMENTS";
+
     private static final String SAVED_DRAWER_SELECTED_POSITION = "drawer_selected_position";
 
     private DrawerLayout drawerLayout;
@@ -60,7 +62,6 @@ public class MainActivity extends Activity implements BitmapStorage.BitmapLoadLi
 
     private long userId;
 
-    private Fragment currentFragment;
     private UpdateReceiver updateReceiver = new UpdateReceiver();
     private Handler handler = new Handler();
 
@@ -110,7 +111,7 @@ public class MainActivity extends Activity implements BitmapStorage.BitmapLoadLi
         if (savedInstanceState == null) {
             selectItem(DRAWER_MAP_POSITION);
         } else {
-            selectItem(savedInstanceState.getInt(SAVED_DRAWER_SELECTED_POSITION, DRAWER_MAP_POSITION));
+            setTitle(menuTitles[savedInstanceState.getInt(SAVED_DRAWER_SELECTED_POSITION, DRAWER_MAP_POSITION)]);
         }
     }
 
@@ -151,6 +152,7 @@ public class MainActivity extends Activity implements BitmapStorage.BitmapLoadLi
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         int currentDrawerPosition;
+        Fragment currentFragment = getCurrentFragment();
         if (currentFragment instanceof MapFragment) {
             currentDrawerPosition = DRAWER_MAP_POSITION;
         } else if (currentFragment instanceof FriendListFragment) {
@@ -223,9 +225,12 @@ public class MainActivity extends Activity implements BitmapStorage.BitmapLoadLi
     }
 
     public void switchToFragment(Fragment fragment) {
-        currentFragment = fragment;
         FragmentManager fragmentManager = getFragmentManager();
-        fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
+        fragmentManager.beginTransaction().replace(R.id.content_frame, fragment, FRAGMENTS_TAG).commit();
+    }
+
+    private Fragment getCurrentFragment() {
+        return getFragmentManager().findFragmentByTag(FRAGMENTS_TAG);
     }
 
     @Override
@@ -250,6 +255,7 @@ public class MainActivity extends Activity implements BitmapStorage.BitmapLoadLi
     private class UpdateReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
+            Fragment currentFragment = MainActivity.this.getCurrentFragment();
             if (currentFragment instanceof DataChangeListener) {
                 ((DataChangeListener) currentFragment).onDataChange();
             }
