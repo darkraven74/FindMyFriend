@@ -146,6 +146,9 @@ public class UpdateService extends IntentService {
         }
         JSONObject idsJson = genIdsJson(friends);
         HttpEntity entity = postJson(URL_GET_FRIENDS_COORDINATES, idsJson);
+        if (entity == null) {
+            return;
+        }
         try {
             JSONObject resJson = new JSONObject(EntityUtils.toString(entity));
             JSONArray result = resJson.getJSONArray("users");
